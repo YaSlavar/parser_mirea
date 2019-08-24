@@ -26,13 +26,13 @@ def run(start_semester=None, input_file=None, output_file=None, groups=None):
 
         writer = New_to_old_table(template, base_name, out_file, start_date, group_list)
         writer.run()
-        print("Конвертация успешно выполнена!")
+
     else:
         source_file = os.path.join(os.path.dirname(sys.argv[0]), input_file)
         out_file = os.path.join(os.path.dirname(sys.argv[0]), output_file)
 
         reader = Reader(source_file, base_name)
-        group_name_list = reader.read(write_to_json_file=False, write_to_csv_file=False, write_to_db=True)
+        group_name_list = reader.read(write_to_json_file=True, write_to_csv_file=True, write_to_db=True)
         for name in group_name_list:
             print(name)
         writer = New_to_old_table(template, base_name, out_file, start_semester, groups)
@@ -41,19 +41,38 @@ def run(start_semester=None, input_file=None, output_file=None, groups=None):
 
 if __name__ == "__main__":
 
-    try:
-        with open(os.path.join(os.path.dirname(sys.argv[0]), "config.json"), encoding="utf-8") as fh:
-            conf = json.loads(fh.read())
-            start_semester = conf["start_semester"]
-            del conf['start_semester']
-            for kurs in conf:
-                input_file = conf[kurs]["input_files"]
-                output_file = conf[kurs]["output_files"]
-                groups = conf[kurs]["groups"]
-                run(start_semester, input_file, output_file, groups)
+    while True:
+        mode = int(input("Выберите режим работы: \n"
+                         "1) Конвертация на основе настроек файла config.json\n"
+                         "2) Конвертация на основе пользовательского ввода (ручной ввод данных о конвертируемых файлах и т.д.)\n"
+                         "0) Завершить выполнение скрипта!\n"))
 
-    except FileNotFoundError as err:
-        print("Ошибка! Не найден файл шаблона 'template.xlsx'")
-        run()
-    except Exception as err:
-        print(err)
+        try:
+            if mode == 1:
+
+                with open(os.path.join(os.path.dirname(sys.argv[0]), "config.json"), encoding="utf-8") as fh:
+                    conf = json.loads(fh.read())
+                    start_semester = conf["start_semester"]
+                    del conf['start_semester']
+                    for kurs in conf:
+                        input_file = conf[kurs]["input_files"]
+                        output_file = conf[kurs]["output_files"]
+                        groups = conf[kurs]["groups"]
+                        run(start_semester, input_file, output_file, groups)
+
+                print("Конвертация успешно выполнена!\n")
+
+            elif mode == 2:
+                run()
+                print("Конвертация успешно выполнена!\n")
+                continue
+
+            elif mode == 0:
+                exit(0)
+
+        except FileNotFoundError as err:
+            print("Ошибка! Не найден файл шаблона 'template.xlsx' или файлы исходного расписания")
+            continue
+        except Exception as err:
+            print(err, "\n")
+            continue
