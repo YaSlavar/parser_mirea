@@ -11,16 +11,17 @@ def run(start_semester=None, input_file=None, output_file=None, groups=None):
 
     if start_semester is None:
         source_file = input("Введите путь к файлу расписания в новой форме и нажмите Enter ...  ")
-        out_file = input("Введите имя создаваемого файла (без расширения)...  ")
+        out_file = input("Введите имя создаваемого файла таблицы по граппам(без расширения)...  ")
         out_file = os.path.join(os.path.dirname(sys.argv[0]), out_file + ".xlsx")
         print(out_file)
         reader = Reader(source_file, base_name)
-        group_name_list = reader.read(write_to_json_file=False, write_to_csv_file=False, write_to_db=True)
+        group_name_list = reader.read(write_to_json_file=True, write_to_csv_file=True, write_to_db=True)
         start_date = input("Введите дату начала семестра. Например: 09.02.2018 ...  ")
         print("В текущем файле имеюися следующие группы:")
         for name in group_name_list:
             print(name)
-        group_list = input("Введите названия групп через запятую. Например: БНБО-01-16, БНБО-02-16 ...   ")
+        group_list = input("Введите названия групп, которые Вы хотите видеть в таблице по группам (через запятую). "
+                           "Например: БНБО-01-16, БНБО-02-16 ...   ")
         group_list = group_list.replace(" ", "").split(",")
 
         writer = New_to_old_table(template, base_name, out_file, start_date, group_list)
