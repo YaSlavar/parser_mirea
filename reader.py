@@ -33,7 +33,7 @@ except ImportError:
 
 
 class Reader:
-    """Класс для парсинга расписания MIREA из xls файлов"""
+    """Класс для парсинга расписания MIREA из xlsx файлов"""
 
     def __init__(self, src, path_to_db=None):
         """Инициализация клсса
@@ -50,6 +50,7 @@ class Reader:
             write_to_json_file(bol): Записывать ли в JSON файл
             write_to_csv_file(bol): Записывать ли в CSV файл
         """
+        global colimn_range
         timetable = {}
         group_list = []
         # строка с названиями групп
@@ -58,9 +59,31 @@ class Reader:
             group = str(is_group.value)
             group = re.search(r"([А-Я]+-\w+-\w+)", group)
             if group:  # Если название найдено, то получение расписания этой группы
+
+                if not group_list:  # инициализация списка диапазонов пар
+                    colimn_range = []
+                    inicial_row_num = 3  # Номер строки, с которой начинается отсчет пар
+
+                    para_count = 0  # Счетчик количества пар
+                    # Перебор столбца с номерами пар и вычисление на основании количества пар в день диапазона выбора ячеек
+                    for para_num in range(inicial_row_num, len(self.sheets.col(row.index(is_group) - 4))):
+                        para_num_col = self.sheets.cell(para_num, row.index(is_group) - 4)
+                        para_num_val = para_num_col.value
+                        if isinstance(para_num_val, float):
+                            para_num_val = int(para_num_val)
+                            if para_num_val > para_count:
+                                para_count = para_num_val
+
+                    start_day_range = inicial_row_num
+                    for day_range in range(para_count):
+                        end_day_range = para_count * 2 + start_day_range
+                        day_typle = (start_day_range, end_day_range)
+                        colimn_range.append(day_typle)
+                        start_day_range = end_day_range
+
                 print(group.group(0))
                 group_list.append(group.group(0))
-                one_time_table = self.read_one_group(row.index(is_group))  # По номеру столбца
+                one_time_table = self.read_one_group(row.index(is_group), colimn_range)  # По номеру столбца
                 for key in one_time_table.keys():
                     timetable[key] = one_time_table[key]  # Добавление в общий словарь
 
@@ -102,8 +125,6 @@ class Reader:
 
         result = []
 
-        # temp_name = re.findall(r"(\s*[\W\s]*(?:|кр[ .]\s*|\d+-\d+|[\d,. ]*)\s*[\D\W.]\s*(?:|[\W\s]|\D)*)(?:\s\s|\Z|\n|\b)", temp_name, flags=re.A)
-        # temp_name = re.findall(r"(\s*[\W\s]*(?:|кр[ .]\s*|\d+-\d+|[\d,. ]*)\s*[\D\W.]\s*(?:|[\W\s]|\D)*)(?:\s\s|\Z|\n)", temp_name, flags=re.A)
 
         temp_name = temp_name.replace(" ", "  ")
 
@@ -112,29 +133,29 @@ class Reader:
         if isinstance(temp_name, list):
             for item in temp_name:
                 if len(item) > 0:
-                    if_except = re.search(r"(кр[. ])", item)
-                    if_include = re.search(r"( н[. ])|(н[. ])|(\d\s\W)|(\d+\s+\D)", item)
+                    if_except = re.search(r"(кр[. \w])", item, flags=re.A)
+                    if_include = re.search(r"( н[. ])|(н[. ])|(\d\s\W)|(\d+\s+\D)", item, flags=re.A)
                     _except = ""
                     _include = ""
-                    item = re.sub(r"\(", "", item)
-                    item = re.sub(r"\)", "", item)
+                    item = re.sub(r"\(", "", item, flags=re.A)
+                    item = re.sub(r"\)", "", item, flags=re.A)
                     if if_except:
-                        if re.search(r"\d+-\d+", item):
+                        if re.search(r"\d+-\d+", item, flags=re.A):
                             _except = if_diapason_week(item)
-                            item = re.sub(r"\d+-\d+", "", item)
+                            item = re.sub(r"\d+-\d+", "", item, flags=re.A)
                         else:
-                            _except = re.findall(r"(\d+)", item)
-                        item = re.sub(r"(кр[. ])", "", item)
-                        item = re.sub(r"(\d+[,. ]+)", "", item)
-                        name = re.sub(r"( н[. ])", "", item)
+                            _except = re.findall(r"(\d+)", item, flags=re.A)
+                        item = re.sub(r"(кр[. \w])", "", item, flags=re.A)
+                        item = re.sub(r"(\d+[,. ]+)", "", item, flags=re.A)
+                        name = re.sub(r"( н[. ])", "", item, flags=re.A)
                     elif if_include:
                         if re.search(r"\d+-\d+", item):
                             _include = if_diapason_week(item)
-                            item = re.sub(r"\d+-\d+", "", item)
+                            item = re.sub(r"\d+-\d+", "", item, flags=re.A)
                         else:
-                            _include = re.findall(r"(\d+)", item)
-                        item = re.sub(r"(\d+[,. н]+)", "", item)
-                        name = re.sub(r"(н[. ])", "", item)
+                            _include = re.findall(r"(\d+)", item, flags=re.A)
+                        item = re.sub(r"(\d+[,. н]+)", "", item, flags=re.A)
+                        name = re.sub(r"(н[. ])", "", item, flags=re.A)
                     else:
                         name = item
                     # name = re.sub(r"  ", " ", name)
@@ -214,15 +235,16 @@ class Reader:
         with open(self.json_file, "w", encoding="utf-8") as fh:
             fh.write(json.dumps(timetable, ensure_ascii=False, indent=4))
 
-    def read_one_group(self, col):
+    def read_one_group(self, col, colimn_range):
         """Получение расписания одной группы
             col(int): Номер столбца колонки 'Предмет'
+            column_range(list): Диапазон выбора ячеек
         """
         one_group = {}
         group_name = self.sheets.cell(1, col).value  # Название группы
         one_group[group_name] = {}  # Инициализация словаря
-        colimn_range = [(3, 15), (15, 27), (27, 39), (39, 51), (51, 63), (63, 75)]
-        # перебор по дням недели (понедельник-пятница)
+
+        # перебор по дням недели (понедельник-суббота)
         for column in colimn_range:
             one_day = {}
             # номер дня недели (1-6)
@@ -282,7 +304,7 @@ if __name__ == "__main__":
         reader = Reader(xlsx_path, "table.db")
         res = reader.read(write_to_json_file=False, write_to_csv_file=False, write_to_db=True)
 
-    # reader = Reader("xls/КБиСП 1 курс 2 сем .xlsx", "table.db")
+    # reader = Reader("xls/Magistry-IKBSP-1-kurs.xlsx", "table.db")
     # res = reader.read(write_to_json_file=False, write_to_csv_file=False, write_to_db=True)
 
     # print(res)
@@ -302,6 +324,8 @@ if __name__ == "__main__":
     # result = reader.format_name("2,6,10,14 н Кроссплатформенная среда исполнения программного обеспечения 4,8,12,16 н Кроссплатформенная среда исполнения программного обеспечения")
     # print(result)
     # result = reader.format_name("кр 1,13 н Интеллектуальные информационные системы")
+    # print(result)
+    # result = reader.format_name("кр1 н Модели информационных процессов и систем")
     # print(result)
 
     # result = reader.format_prepod_name("Козлова Г.Г.\nИсаев Р.А.")
