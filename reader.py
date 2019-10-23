@@ -5,6 +5,9 @@ import sqlite3
 import os.path
 import sys
 import subprocess
+import datetime
+from itertools import cycle
+from downloader import Download_file_from_site
 
 
 def install(package):
@@ -100,9 +103,29 @@ class Reader:
 
     @staticmethod
     def format_prepod_name(cell):
-        cell = re.sub(r'\n', '  ', cell, flags=re.A)
-        cell = cell.split('~')
-        return cell
+        return re.split(r' {2,}|\n', cell)
+
+    @staticmethod
+    def format_room_name(cell):
+        notes_dict = {
+            'МП-1': "ул. Малая Пироговская, д.1",
+            'В-78': "Проспект Вернадского, д.78",
+            'В-86': "Проспект Вернадского, д.86",
+            'С-20': "ул. Стромынка, 20",
+            'СГ-22': "5-я ул. Соколиной горы, д.22"
+        }
+
+        if isinstance(cell, float):
+            cell = int(cell)
+        string = str(cell)
+        for pattern in notes_dict:
+            regex_result = re.findall(pattern, string, flags=re.A)
+            if regex_result:
+                string = string.replace(' ', '').replace('*', '').replace('\n', '')
+
+                string = re.sub(regex_result[0], notes_dict[regex_result[0]] + " ", string, flags=re.A)
+
+        return re.split(r' {2,}|\n', string)
 
     # TODO: хз что делать с этими гребанными регулярками гребанный re.sub использует FullMach
 
@@ -124,8 +147,6 @@ class Reader:
             return weeks
 
         result = []
-
-
         temp_name = temp_name.replace(" ", "  ")
 
         temp_name = re.findall(r"((?:\s*[\W\s]*)(?:|кр[ .]\s*|\d+-\d+|[\d,. ]*)\s*\s*(?:|[\W\s]*|\D*)*)(?:\s\s|\Z|\n)",
@@ -259,16 +280,27 @@ class Reader:
                 tmp_name = str(self.sheets.cell(string, col).value)
 
                 tmp_name = self.format_name(tmp_name)
-                if isinstance(tmp_name, list):
+                if isinstance(tmp_name, list) and tmp_name != []:
 
                     para_type = self.sheets.cell(string, col + 1).value
-                    prepod = self.sheets.cell(string, col + 2).value
-                    room = self.sheets.cell(string, col + 3).value
+                    prepod = self.format_prepod_name(self.sheets.cell(string, col + 2).value)
+                    room = self.format_room_name(self.sheets.cell(string, col + 3).value)
 
-                    for item in tmp_name:
-                        name = item[0]
-                        include = item[1]
-                        exception = item[2]
+                    max_len = max(len(tmp_name), len(prepod), len(room))
+                    if len(tmp_name) < max_len:
+                        tmp_name = cycle(tmp_name)
+                    if len(prepod) < max_len:
+                        prepod = cycle(prepod)
+                    if len(room) < max_len:
+                        room = cycle(room)
+
+                    cortage = list(zip(tmp_name, prepod, room))
+                    for cortage_item in cortage:
+                        name = cortage_item[0][0]
+                        include = cortage_item[0][1]
+                        exception = cortage_item[0][2]
+                        prepod = cortage_item[1]
+                        room = cortage_item[2]
 
                         if isinstance(room, float):
                             room = int(room)
@@ -298,13 +330,23 @@ class Reader:
 
 if __name__ == "__main__":
 
+    Downloader = Download_file_from_site(path_to_error_log='logs/downloadErrorLog.csv', file_dir='xls/',
+                                         file_type='xlsx')
+    Downloader.download()
+
     for i in os.scandir("xls"):
         xlsx_path = os.path.join("xls", i.name)
         print(xlsx_path)
-        reader = Reader(xlsx_path, "table.db")
-        res = reader.read(write_to_json_file=False, write_to_csv_file=False, write_to_db=True)
+        try:
+            reader = Reader(xlsx_path, "table.db")
+            res = reader.read(write_to_json_file=False, write_to_csv_file=False, write_to_db=True)
+        except Exception as err:
+            print(err)
+            with open('logs/ErrorLog.txt', 'a+') as file:
+                file.write(str(datetime.datetime.now()) + ':' + str(i) + 'message:' + str(err) + '\n')
+            continue
 
-    # reader = Reader("xls/Magistry-IKBSP-1-kurs.xlsx", "table.db")
+    # reader = Reader("xls/КБиСП 4 курс 1 сем.xlsx", "table.db")
     # res = reader.read(write_to_json_file=False, write_to_csv_file=False, write_to_db=True)
 
     # print(res)
@@ -327,6 +369,12 @@ if __name__ == "__main__":
     # print(result)
     # result = reader.format_name("кр1 н Модели информационных процессов и систем")
     # print(result)
-
+    #
     # result = reader.format_prepod_name("Козлова Г.Г.\nИсаев Р.А.")
+    # print(result)
+
+    # result = reader.format_room_name("В-78*\nБ-105")
+    # print(result)
+    #
+    # result = reader.format_room_name("23452     Б-105")
     # print(result)
