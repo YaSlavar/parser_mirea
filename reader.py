@@ -7,7 +7,7 @@ import sys
 import subprocess
 import datetime
 from itertools import cycle
-from downloader import Download_file_from_site
+from downloader import Downloader
 
 
 def install(package):
@@ -53,7 +53,19 @@ class Reader:
             write_to_json_file(bol): Записывать ли в JSON файл
             write_to_csv_file(bol): Записывать ли в CSV файл
         """
-        global colimn_range
+
+        def get_day_num(day_name):
+            days = {
+                'ПОНЕДЕЛЬНИК': 1,
+                'ВТОРНИК': 2,
+                'СРЕДА': 3,
+                'ЧЕТВЕРГ': 4,
+                'ПЯТНИЦА': 5,
+                'СУББОТА': 6
+            }
+            return days[day_name]
+
+        column_range = []
         timetable = {}
         group_list = []
         # строка с названиями групп
@@ -64,29 +76,54 @@ class Reader:
             if group:  # Если название найдено, то получение расписания этой группы
 
                 if not group_list:  # инициализация списка диапазонов пар
-                    colimn_range = []
+                    column_range = {
+                        1: [],
+                        2: [],
+                        3: [],
+                        4: [],
+                        5: [],
+                        6: []
+                    }
+
                     inicial_row_num = 3  # Номер строки, с которой начинается отсчет пар
 
                     para_count = 0  # Счетчик количества пар
                     # Перебор столбца с номерами пар и вычисление на основании количества пар в день диапазона выбора ячеек
-                    for para_num in range(inicial_row_num, len(self.sheets.col(row.index(is_group) - 4))):
-                        para_num_col = self.sheets.cell(para_num, row.index(is_group) - 4)
-                        para_num_val = para_num_col.value
-                        if isinstance(para_num_val, float):
-                            para_num_val = int(para_num_val)
-                            if para_num_val > para_count:
-                                para_count = para_num_val
 
-                    start_day_range = inicial_row_num
-                    for day_range in range(para_count):
-                        end_day_range = para_count * 2 + start_day_range
-                        day_typle = (start_day_range, end_day_range)
-                        colimn_range.append(day_typle)
-                        start_day_range = end_day_range
+                    day_num_val, para_num_val, para_time_val, para_week_num_val = 0, 0, 0, 0
+                    for para_num in range(inicial_row_num, len(self.sheets.col(row.index(is_group) - 4))):
+
+                        day_num_col = self.sheets.cell(para_num, row.index(is_group) - 5)
+                        if day_num_col.value != '':
+                            day_num_val = get_day_num(day_num_col.value)
+
+                        para_num_col = self.sheets.cell(para_num, row.index(is_group) - 4)
+                        if para_num_col.value != '':
+                            para_num_val = para_num_col.value
+                            if isinstance(para_num_val, float):
+                                para_num_val = int(para_num_val)
+                                if para_num_val > para_count:
+                                    para_count = para_num_val
+
+                        para_time_col = self.sheets.cell(para_num, row.index(is_group) - 3)
+                        if para_time_col.value != '':
+                            para_time_val = para_time_col.value.replace('-', ':')
+                        para_week_num = self.sheets.cell(para_num, row.index(is_group) - 1)
+                        if para_week_num.value != '':
+                            if para_week_num.value == 'I':
+                                para_week_num_val = 1
+                            else:
+                                para_week_num_val = 2
+
+                        para_string_index = para_num
+
+                        if re.findall(r'\d+:\d+', para_time_val, flags=re.A):
+                            para_range = (para_num_val, para_time_val, para_week_num_val, para_string_index)
+                            column_range[day_num_val].append(para_range)
 
                 print(group.group(0))
                 group_list.append(group.group(0))
-                one_time_table = self.read_one_group(row.index(is_group), colimn_range)  # По номеру столбца
+                one_time_table = self.read_one_group(row.index(is_group), column_range)  # По номеру столбца
                 for key in one_time_table.keys():
                     timetable[key] = one_time_table[key]  # Добавление в общий словарь
 
@@ -148,6 +185,9 @@ class Reader:
 
         result = []
         temp_name = temp_name.replace(" ", "  ")
+
+        temp_name = re.sub(r"(кр\. {2,})", "кр.", temp_name, flags=re.A)
+        temp_name = re.sub(r"(н[\d,. ]*\+)", "", temp_name, flags=re.A)
 
         temp_name = re.findall(r"((?:\s*[\W\s]*)(?:|кр[ .]\s*|\d+-\d+|[\d,. ]*)\s*\s*(?:|[\W\s]*|\D*)*)(?:\s\s|\Z|\n)",
                                temp_name, flags=re.A)
@@ -256,56 +296,60 @@ class Reader:
         with open(self.json_file, "w", encoding="utf-8") as fh:
             fh.write(json.dumps(timetable, ensure_ascii=False, indent=4))
 
-    def read_one_group(self, col, colimn_range):
+    def read_one_group(self, col, range):
         """Получение расписания одной группы
             col(int): Номер столбца колонки 'Предмет'
-            column_range(list): Диапазон выбора ячеек
+            range(dict): Диапазон выбора ячеек
         """
         one_group = {}
         group_name = self.sheets.cell(1, col).value  # Название группы
         one_group[group_name] = {}  # Инициализация словаря
 
         # перебор по дням недели (понедельник-суббота)
-        for column in colimn_range:
+        # номер дня недели (1-6)
+        for day_num in range:
             one_day = {}
-            # номер дня недели (1-6)
-            day_num = colimn_range.index(column) + 1
-            week_num = 1
-            para_num = 1
-            # Перебор одного дня (1-6 пара)
-            for string in range(column[0], column[1]):
-                if week_num == 1:
-                    one_day["para_{}".format(para_num)] = {}
-                # Получение данных об одной паре
-                tmp_name = str(self.sheets.cell(string, col).value)
 
+            for para_range in range[day_num]:
+                para_num = para_range[0]
+                time = para_range[1]
+                week_num = para_range[2]
+                string_index = para_range[3]
+
+                # Перебор одного дня (1-6 пара)
+                if "para_{}".format(para_num) not in one_day:
+                    one_day["para_{}".format(para_num)] = {}
+
+                # Получение данных об одной паре
+                tmp_name = str(self.sheets.cell(string_index, col).value)
                 tmp_name = self.format_name(tmp_name)
+
                 if isinstance(tmp_name, list) and tmp_name != []:
 
-                    para_type = self.sheets.cell(string, col + 1).value
-                    prepod = self.format_prepod_name(self.sheets.cell(string, col + 2).value)
-                    room = self.format_room_name(self.sheets.cell(string, col + 3).value)
+                    para_type = self.sheets.cell(string_index, col + 1).value
+                    teacher = self.format_prepod_name(self.sheets.cell(string_index, col + 2).value)
+                    room = self.format_room_name(self.sheets.cell(string_index, col + 3).value)
 
-                    max_len = max(len(tmp_name), len(prepod), len(room))
+                    max_len = max(len(tmp_name), len(teacher), len(room))
                     if len(tmp_name) < max_len:
                         tmp_name = cycle(tmp_name)
-                    if len(prepod) < max_len:
-                        prepod = cycle(prepod)
+                    if len(teacher) < max_len:
+                        teacher = cycle(teacher)
                     if len(room) < max_len:
                         room = cycle(room)
 
-                    cortage = list(zip(tmp_name, prepod, room))
-                    for cortage_item in cortage:
-                        name = cortage_item[0][0]
-                        include = cortage_item[0][1]
-                        exception = cortage_item[0][2]
-                        prepod = cortage_item[1]
-                        room = cortage_item[2]
+                    para_tuple = list(zip(tmp_name, teacher, room))
+                    for tuple_item in para_tuple:
+                        name = tuple_item[0][0]
+                        include = tuple_item[0][1]
+                        exception = tuple_item[0][2]
+                        teacher = tuple_item[1]
+                        room = tuple_item[2]
 
                         if isinstance(room, float):
                             room = int(room)
 
-                        one_para = {"name": name, "type": para_type, "prepod": prepod, "room": room}
+                        one_para = {"name": name, "type": para_type, "prepod": teacher, "room": room}
                         if include:
                             one_para["include"] = include
                         if exception:
@@ -317,26 +361,24 @@ class Reader:
                                     "week_{}".format(week_num)] = []  # Инициализация списка
                             one_day["para_{}".format(para_num)]["week_{}".format(week_num)].append(one_para)
 
-                # Изменение четности недели и инкремент пары
-                if week_num == 1:
-                    week_num = 2
-                elif week_num == 2:
-                    week_num = 1
-                    para_num += 1
-            # Объединение расписания
-            one_group[group_name]["day_{}".format(day_num)] = one_day
+                    # Объединение расписания
+                    one_group[group_name]["day_{}".format(day_num)] = one_day
+
         return one_group
 
 
 if __name__ == "__main__":
 
-    Downloader = Download_file_from_site(path_to_error_log='logs/downloadErrorLog.csv', file_dir='xls/',
+    Downloader = Downloader(path_to_error_log='logs/downloadErrorLog.csv', file_dir='xls/',
                                          file_type='xlsx')
     Downloader.download()
 
     for i in os.scandir("xls"):
         xlsx_path = os.path.join("xls", i.name)
         print(xlsx_path)
+
+        # reader = Reader(xlsx_path, "table.db")
+        # res = reader.read(write_to_json_file=False, write_to_csv_file=False, write_to_db=True)
         try:
             reader = Reader(xlsx_path, "table.db")
             res = reader.read(write_to_json_file=False, write_to_csv_file=False, write_to_db=True)
@@ -351,6 +393,7 @@ if __name__ == "__main__":
 
     # print(res)
 
+    # reader = Reader
     # result = reader.format_name("2,6,10,14 н Экология\n4,8,12,16 Правоведение")
     # print(result)
     # result = reader.format_name("Деньги, кредит, банки кр. 2,8,10 н.")
@@ -369,10 +412,12 @@ if __name__ == "__main__":
     # print(result)
     # result = reader.format_name("кр1 н Модели информационных процессов и систем")
     # print(result)
+    # result = reader.format_name("Разработка ПАОИиАС 2,6,10,14 н.+4,8,12,16н.")
+    # print(result)
     #
     # result = reader.format_prepod_name("Козлова Г.Г.\nИсаев Р.А.")
     # print(result)
-
+    #
     # result = reader.format_room_name("В-78*\nБ-105")
     # print(result)
     #

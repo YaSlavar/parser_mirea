@@ -27,3 +27,154 @@
 2019-10-23 23:22:45.369444:<DirEntry 'Z-4-kurs-RTU-MIREA-_osen_.xlsx'>message:list index out of range
 2019-10-23 23:22:45.844589:<DirEntry '_-FTI_Stromynka-1-kurs-1-sem-MAGI_2019.xlsx'>message:list index out of range
 2019-10-23 23:22:45.890587:<DirEntry '_-FTI_Stromynka-2-kurs-3-sem-MAGI_2019.xlsx'>message:list index out of range
+2019-10-28 09:38:38.151508:<DirEntry 'IEP_4-kurs_zaochnoe.xlsx'>message:list index out of range
+2019-10-28 09:38:40.105779:<DirEntry 'IINTEGU_zaoch_3k_19_20_osen.xlsx'>message:list index out of range
+2019-10-28 09:38:40.201639:<DirEntry 'IINTEGU_zaoch_4k_19_20_osen.xlsx'>message:list index out of range
+2019-10-28 09:38:51.372510:<DirEntry 'itht_bak_4k_FOZO_19_20_osen.xlsx'>message:list index out of range
+2019-10-28 09:38:59.879230:<DirEntry 'O_Z-4-kurs-RTU-MIREA-_osen_.xlsx'>message:list index out of range
+2019-10-28 09:38:59.980168:<DirEntry 'O_Z-5-kurs-RTU-MIREA-_osen_.xlsx'>message:list index out of range
+2019-10-28 09:39:00.522836:<DirEntry 'Z-3-kurs-RTU-MIREA-_osen_.xlsx'>message:list index out of range
+2019-10-28 09:39:01.459421:<DirEntry 'Z-4-kurs-RTU-MIREA-_osen_.xlsx'>message:list index out of range
+2019-10-28 09:39:02.342738:<DirEntry '_-FTI_Stromynka-1-kurs-1-sem-MAGI_2019.xlsx'>message:list index out of range
+2019-10-28 09:39:02.469659:<DirEntry '_-FTI_Stromynka-2-kurs-3-sem-MAGI_2019.xlsx'>message:list index out of range
+2019-10-28 09:59:36.648463:<DirEntry 'bak-zaochnoe.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:36.857633:<DirEntry 'FTI_1k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:37.094280:<DirEntry 'FTI_2k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:37.189360:<DirEntry 'FTI_3k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:37.301363:<DirEntry 'FTI_4k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:37.373319:<DirEntry 'FTI_5k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:37.512236:<DirEntry 'FTI_mag_1k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:38.054901:<DirEntry 'FTI_mag_2k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:38.930362:<DirEntry 'FTI_Stromynka-1-kurs-1-sem.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:39.201192:<DirEntry 'FTI_Stromynka-2-kurs-1-sem-.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:39.449042:<DirEntry 'FTI_Stromynka-3-kurs-1-sem.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:39.674899:<DirEntry 'FTI_Stromynka-4-kurs-1-sem.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:39.725934:<DirEntry 'FTI_Stromynka-5-kurs-1-sem.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:39.938590:<DirEntry 'IEP-1-kurs-1-sem.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:40.191492:<DirEntry 'IEP-2-kurs-1-sem.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:40.396422:<DirEntry 'IEP-3-kurs-1-sem.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:40.591321:<DirEntry 'IEP-4-kurs-1-sem.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:40.723572:<DirEntry 'IEP_1-kurs_Mag_och.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:40.867570:<DirEntry 'IEP_2-kurs_Mag_och.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:40.990571:<DirEntry 'IEP_3-kurs_zaochnoe.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:41.105697:<DirEntry 'IEP_4-kurs_vechernee.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:41.164418:<DirEntry 'IEP_4-kurs_zaochnoe.xlsx'>message:list index out of range
+2019-10-28 09:59:41.429619:<DirEntry 'IINTEGU_1k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:41.654211:<DirEntry 'IINTEGU_2k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:41.889976:<DirEntry 'IINTEGU_3k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:42.067508:<DirEntry 'IINTEGU_4k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:42.248466:<DirEntry 'IINTEGU_mag_1k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:42.379700:<DirEntry 'IINTEGU_mag_2k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:42.482557:<DirEntry 'IINTEGU_zaoch_3k_19_20_osen.xlsx'>message:list index out of range
+2019-10-28 09:59:42.563909:<DirEntry 'IINTEGU_zaoch_4k_19_20_osen.xlsx'>message:list index out of range
+2019-10-28 09:59:43.086432:<DirEntry 'IIT_1k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:43.467087:<DirEntry 'IIT_2k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:43.774865:<DirEntry 'IIT_3k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:44.043725:<DirEntry 'IIT_4k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:44.452638:<DirEntry 'IIT_mag_1k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:45.502913:<DirEntry 'IIT_mag_2k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:45.693876:<DirEntry 'IKib_mag_1k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:45.872823:<DirEntry 'IKib_mag_2k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:46.175209:<DirEntry 'IK_1k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:46.433072:<DirEntry 'IK_2k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:46.727858:<DirEntry 'IK_3k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:47.003131:<DirEntry 'IK_4k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:47.171488:<DirEntry 'IK_5k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:47.332520:<DirEntry 'IRTS_1k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:47.497015:<DirEntry 'IRTS_2k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:47.637151:<DirEntry 'IRTS_3k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:47.775538:<DirEntry 'IRTS_4k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:47.850707:<DirEntry 'IRTS_5k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:47.980766:<DirEntry 'IRTS_mag_1k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:48.106889:<DirEntry 'IRTS_mag_2k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:48.476705:<DirEntry 'itht_bak_1k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:48.800474:<DirEntry 'itht_bak_2k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:48.882903:<DirEntry 'itht_bak_4k_FOZO_19_20_osen.xlsx'>message:list index out of range
+2019-10-28 09:59:49.430577:<DirEntry 'itht_mag_1k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:50.024675:<DirEntry 'itht_mag_2k_19_20_osen.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:50.509317:<DirEntry 'KBiSP-1-kurs-1-sem.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:51.025223:<DirEntry 'KBiSP-2-kurs-1-sem.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:52.409378:<DirEntry 'KBiSP-3-kurs-1-sem.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:52.790067:<DirEntry 'KBiSP-4-kurs-1-sem.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:53.019848:<DirEntry 'KBiSP-5-kurs-1-sem.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:53.209495:<DirEntry 'Magistry-IKBSP-1-kurs.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:53.321097:<DirEntry 'Magistry-IKBSP-2-kurs.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:53.471366:<DirEntry 'O_Z-4-kurs-RTU-MIREA-_osen_.xlsx'>message:list index out of range
+2019-10-28 09:59:53.544315:<DirEntry 'O_Z-5-kurs-RTU-MIREA-_osen_.xlsx'>message:list index out of range
+2019-10-28 09:59:53.911779:<DirEntry 'Z-3-kurs-RTU-MIREA-_osen_.xlsx'>message:list index out of range
+2019-10-28 09:59:54.658683:<DirEntry 'Z-4-kurs-RTU-MIREA-_osen_.xlsx'>message:list index out of range
+2019-10-28 09:59:55.001526:<DirEntry 'Z-5-kurs-RTU-MIREA-_osen_.xlsx'>message:not enough values to unpack (expected 4, got 0)
+2019-10-28 09:59:55.172634:<DirEntry '_-FTI_Stromynka-1-kurs-1-sem-MAGI_2019.xlsx'>message:list index out of range
+2019-10-28 09:59:55.313760:<DirEntry '_-FTI_Stromynka-2-kurs-3-sem-MAGI_2019.xlsx'>message:list index out of range
+2019-10-28 10:00:24.404998:<DirEntry 'IEP_4-kurs_zaochnoe.xlsx'>message:list index out of range
+2019-10-28 10:01:02.726698:<DirEntry 'IEP_4-kurs_zaochnoe.xlsx'>message:list index out of range
+2019-10-28 10:01:04.885942:<DirEntry 'IINTEGU_zaoch_3k_19_20_osen.xlsx'>message:list index out of range
+2019-10-28 10:01:04.949140:<DirEntry 'IINTEGU_zaoch_4k_19_20_osen.xlsx'>message:list index out of range
+2019-10-28 10:01:15.665801:<DirEntry 'itht_bak_4k_FOZO_19_20_osen.xlsx'>message:list index out of range
+2019-10-28 10:01:21.582998:<DirEntry 'O_Z-4-kurs-RTU-MIREA-_osen_.xlsx'>message:list index out of range
+2019-10-28 10:01:21.623972:<DirEntry 'O_Z-5-kurs-RTU-MIREA-_osen_.xlsx'>message:list index out of range
+2019-10-28 10:01:22.123667:<DirEntry 'Z-3-kurs-RTU-MIREA-_osen_.xlsx'>message:list index out of range
+2019-10-28 10:01:23.004545:<DirEntry 'Z-4-kurs-RTU-MIREA-_osen_.xlsx'>message:list index out of range
+2019-10-28 10:01:23.981965:<DirEntry '_-FTI_Stromynka-1-kurs-1-sem-MAGI_2019.xlsx'>message:list index out of range
+2019-10-28 10:01:24.061422:<DirEntry '_-FTI_Stromynka-2-kurs-3-sem-MAGI_2019.xlsx'>message:list index out of range
+2019-10-28 10:56:01.262174:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 10:58:05.358633:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 11:03:48.256438:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 11:04:50.078479:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 11:06:45.752095:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 11:07:05.113937:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 11:07:13.840323:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 11:07:31.779543:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 11:10:31.220798:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 11:13:08.877394:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 11:16:34.198711:<DirEntry 'IIT_mag_1k_19_20_osen.xlsx'>message:'Cell' object is not iterable
+2019-10-28 11:16:34.313079:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 11:18:30.153954:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 11:25:48.251824:<DirEntry 'IIT_mag_1k_19_20_osen.xlsx'>message:object of type 'float' has no len()
+2019-10-28 11:25:48.301792:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 11:26:59.941477:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 11:32:46.369092:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 11:35:35.053199:<DirEntry 'IIT_mag_1k_19_20_osen.xlsx'>message:tuple expected at most 1 arguments, got 4
+2019-10-28 11:35:35.129812:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 11:36:03.802746:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 11:37:03.418651:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 11:37:53.047226:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 11:39:22.147313:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 11:40:04.987318:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 12:06:23.024173:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 12:06:30.528242:<DirEntry 'IIT_mag_1k_19_20_osen.xlsx'>message:name 'para' is not defined
+2019-10-28 12:06:30.545339:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 12:06:40.911455:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 12:08:56.984895:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 12:13:18.480913:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 12:13:48.673336:<DirEntry 'IIT_mag_1k_19_20_osen.xlsx'>message:'str' object cannot be interpreted as an integer
+2019-10-28 12:13:48.749524:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 12:16:46.419909:<DirEntry 'IIT_mag_1k_19_20_osen.xlsx'>message:'str' object cannot be interpreted as an integer
+2019-10-28 12:16:46.479637:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 12:16:53.649081:<DirEntry 'IIT_mag_1k_19_20_osen.xlsx'>message:'str' object cannot be interpreted as an integer
+2019-10-28 12:16:53.666069:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 12:23:52.062700:<DirEntry 'IIT_mag_1k_19_20_osen.xlsx'>message:'tuple' object cannot be interpreted as an integer
+2019-10-28 12:23:52.363181:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 12:25:22.553233:<DirEntry 'IIT_mag_1k_19_20_osen.xlsx'>message:'tuple' object cannot be interpreted as an integer
+2019-10-28 12:25:22.620193:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 12:28:51.326623:<DirEntry 'IIT_mag_1k_19_20_osen.xlsx'>message:'tuple' object cannot be interpreted as an integer
+2019-10-28 12:28:51.442962:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 12:44:12.109735:<DirEntry 'IIT_mag_1k_19_20_osen.xlsx'>message:'tuple' object cannot be interpreted as an integer
+2019-10-28 12:44:12.156708:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 12:49:16.507143:<DirEntry 'IIT_mag_1k_19_20_osen.xlsx'>message:'СРЕДА'
+2019-10-28 12:49:16.569446:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 12:49:32.976144:<DirEntry 'IIT_mag_1k_19_20_osen.xlsx'>message:'tuple' object cannot be interpreted as an integer
+2019-10-28 12:49:33.020994:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 12:50:31.527707:<DirEntry 'IIT_mag_1k_19_20_osen.xlsx'>message:expected string or bytes-like object
+2019-10-28 12:50:31.598334:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 13:03:01.686173:<DirEntry 'IIT_mag_1k_19_20_osen.xlsx'>message:'para_7'
+2019-10-28 13:03:01.790138:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 13:03:25.391448:<DirEntry 'IIT_mag_1k_19_20_osen.xlsx'>message:'para_7'
+2019-10-28 15:07:54.846328:<DirEntry 'IIT_mag_1k_19_20_osen.xlsx'>message:sub() missing 1 required positional argument: 'string'
+2019-10-28 15:07:55.067304:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 15:18:27.019390:<DirEntry '~$IIT_mag_1k_19_20_osen.xlsx'>message:[Errno 13] Permission denied: 'xls\\~$IIT_mag_1k_19_20_osen.xlsx'
+2019-10-28 15:27:56.097159:<DirEntry 'IEP_3-kurs_zaochnoe.xlsx'>message:'Суббота'
+2019-10-28 15:27:56.197113:<DirEntry 'IEP_4-kurs_vechernee.xlsx'>message:'Понедельник'
+2019-10-28 15:27:56.311435:<DirEntry 'IEP_4-kurs_zaochnoe.xlsx'>message:'Суббота'
+2019-10-28 15:28:13.507261:<DirEntry 'O_Z-4-kurs-RTU-MIREA-_osen_.xlsx'>message:'понедельник'
+2019-10-28 15:28:13.601388:<DirEntry 'O_Z-5-kurs-RTU-MIREA-_osen_.xlsx'>message:'понедельник'

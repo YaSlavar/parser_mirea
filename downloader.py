@@ -1,10 +1,37 @@
 from urllib import request
+import sys
+import subprocess
 from bs4 import BeautifulSoup
 import os.path
 import datetime
 
 
-class Download_file_from_site:
+def install(package):
+    """
+    Устанавливает пакет
+    :param package: название пакета (str)
+    :return: код завершения процесса (int) или текст ошибки (str)
+    """
+    try:
+        result = subprocess.check_call([sys.executable, '-m', 'pip', 'install', package])
+    except subprocess.CalledProcessError as result:
+        return result
+
+    return result
+
+
+try:
+    import xlrd
+except ImportError:
+    exit_code = install("beautifulsoup4")
+    if exit_code == 0:
+        import xlrd
+    else:
+        print("При установке пакета возникла ошибка! {}".format(exit_code))
+        exit(0)
+
+
+class Downloader:
     def __init__(self, path_to_error_log='errors/downloadErrorLog.csv', file_dir='xls/', file_type='xls'):
         self.url = 'http://www.mirea.ru/education/schedule-main/schedule/'
         self.path_to_error_log = path_to_error_log
@@ -32,7 +59,7 @@ class Download_file_from_site:
 
         # Списки адресов на файлы
         url_files = [x['href'].replace('https', 'http') for x in xls_list]  # Сохранение списка адресов сайтов
-        percentAll = len(url_files)
+        progress_all = len(url_files)
 
         i = 0
         # Сохранение файлов
@@ -43,7 +70,7 @@ class Download_file_from_site:
                     path_file = os.path.join(self.file_dir, path_file)
                     self.save_file(url_file, path_file)
                     i += 1  # Счетчик для отображения скаченных файлов в %
-                    print('{} -- {}'.format(path_file, i / percentAll * 100))
+                    print('{} -- {}'.format(path_file, i / progress_all * 100))
                 else:
                     i += 1  # Счетчик для отображения скаченных файлов в %
 
@@ -55,5 +82,5 @@ class Download_file_from_site:
 
 
 if __name__ == "__main__":
-    Downloader = Download_file_from_site(path_to_error_log='logs/downloadErrorLog.csv', file_dir='xls/', file_type='xlsx')
+    Downloader = Downloader(path_to_error_log='logs/downloadErrorLog.csv', file_dir='xls/', file_type='xlsx')
     Downloader.download()
