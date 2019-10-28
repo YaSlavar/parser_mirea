@@ -164,8 +164,6 @@ class Reader:
 
         return re.split(r' {2,}|\n', string)
 
-    # TODO: хз что делать с этими гребанными регулярками гребанный re.sub использует FullMach
-
     @staticmethod
     def format_name(temp_name):
         """Разбор строки 'Предмет' на название дисциплины и номера
@@ -173,14 +171,14 @@ class Reader:
             temp_name(str)
         """
 
-        def if_diapason_week(item):
-            start_week = re.findall(r"\d+-", item)
+        def if_diapason_week(para_string):
+            start_week = re.findall(r"\d+-", para_string)
             start_week = re.sub("-", "", start_week[0])
-            end_week = re.findall(r"-\d+", item)
+            end_week = re.findall(r"-\d+", para_string)
             end_week = re.sub("-", "", end_week[0])
             weeks = []
-            for i in range(int(start_week), int(end_week) + 1):
-                weeks.append(i)
+            for week in range(int(start_week), int(end_week) + 1):
+                weeks.append(week)
             return weeks
 
         result = []
@@ -231,22 +229,21 @@ class Reader:
             - путь к файлу базы данных
         """
 
-        global writer, c, conn, table_name
-
-        def create_table(table_name):
+        def create_table(group):
             """Если Таблица не создана, создать таблицу
-                arg1 - Название таблицы
+                table_name - Название таблицы
             """
-            c.execute("DROP TABLE IF EXISTS {}".format(table_name))
-            c.execute("""CREATE TABLE {} (day TEXT, para TEXT,
+            c.execute("DROP TABLE IF EXISTS {}".format(group))
+            c.execute("""CREATE TABLE {} (day TEXT, para TEXT, time DATE,
                       week TEXT, name TEXT, type TEXT, room TEXT, prepod TEXT,
-                      include TEXT, exception TEXT)""".format(table_name))
+                      include TEXT, exception TEXT)""".format(group))
 
-        def data_append(table_name, day, para, week, name, type, room, prepod, include, exception):
+        def data_append(group, day_num, para_num, para_time, parity, discipline, para_type, room, teacher, include_week,
+                        exception_week):
             """Добавление данных в базу данных"""
-            c.execute("""INSERT INTO {} ('day', 'para', 'week', 'name', 'type',
-                      'room','prepod','include','exception') VALUES (?,?,?,?,?,?,?,?,?)""".format(table_name),
-                      (day, para, week, name, type, room, prepod, include, exception))
+            c.execute("""INSERT INTO {} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""".format(group),
+                      (day_num, para_num, para_time, parity, discipline, para_type, room, teacher, include_week,
+                       exception_week))
 
         conn = sqlite3.connect(self.path_to_db)
         c = conn.cursor()
@@ -269,6 +266,7 @@ class Reader:
                             para = n_para.split("_")[1]
                             week = n_week.split("_")[1]
                             for dist in item:
+                                time = dist['time']
                                 if "include" in dist:
                                     include = str(dist["include"])[1:-1]
                                 else:
@@ -282,7 +280,7 @@ class Reader:
                                                          name=dist["name"], type=dist["type"], room=dist["room"],
                                                          prepod=dist["prepod"], include=include, exception=exception))
                                 if write_to_db is not False:
-                                    data_append(table_name, day, para, week,
+                                    data_append(table_name, day, para, time, week,
                                                 dist["name"], dist["type"],
                                                 dist["room"], dist["prepod"],
                                                 include, exception)
@@ -296,21 +294,21 @@ class Reader:
         with open(self.json_file, "w", encoding="utf-8") as fh:
             fh.write(json.dumps(timetable, ensure_ascii=False, indent=4))
 
-    def read_one_group(self, col, range):
+    def read_one_group(self, discipline_col_num, cell_range):
         """Получение расписания одной группы
-            col(int): Номер столбца колонки 'Предмет'
+            discipline_col_num(int): Номер столбца колонки 'Предмет'
             range(dict): Диапазон выбора ячеек
         """
         one_group = {}
-        group_name = self.sheets.cell(1, col).value  # Название группы
+        group_name = self.sheets.cell(1, discipline_col_num).value  # Название группы
         one_group[group_name] = {}  # Инициализация словаря
 
         # перебор по дням недели (понедельник-суббота)
         # номер дня недели (1-6)
-        for day_num in range:
+        for day_num in cell_range:
             one_day = {}
 
-            for para_range in range[day_num]:
+            for para_range in cell_range[day_num]:
                 para_num = para_range[0]
                 time = para_range[1]
                 week_num = para_range[2]
@@ -321,14 +319,14 @@ class Reader:
                     one_day["para_{}".format(para_num)] = {}
 
                 # Получение данных об одной паре
-                tmp_name = str(self.sheets.cell(string_index, col).value)
+                tmp_name = str(self.sheets.cell(string_index, discipline_col_num).value)
                 tmp_name = self.format_name(tmp_name)
 
                 if isinstance(tmp_name, list) and tmp_name != []:
 
-                    para_type = self.sheets.cell(string_index, col + 1).value
-                    teacher = self.format_prepod_name(self.sheets.cell(string_index, col + 2).value)
-                    room = self.format_room_name(self.sheets.cell(string_index, col + 3).value)
+                    para_type = self.sheets.cell(string_index, discipline_col_num + 1).value
+                    teacher = self.format_prepod_name(self.sheets.cell(string_index, discipline_col_num + 2).value)
+                    room = self.format_room_name(self.sheets.cell(string_index, discipline_col_num + 3).value)
 
                     max_len = max(len(tmp_name), len(teacher), len(room))
                     if len(tmp_name) < max_len:
@@ -349,13 +347,13 @@ class Reader:
                         if isinstance(room, float):
                             room = int(room)
 
-                        one_para = {"name": name, "type": para_type, "prepod": teacher, "room": room}
+                        one_para = {"time": time, "name": name, "type": para_type, "prepod": teacher, "room": room}
                         if include:
                             one_para["include"] = include
                         if exception:
                             one_para["exception"] = exception
 
-                        if name:
+                        if name and room:
                             if "week_{}".format(week_num) not in one_day["para_{}".format(para_num)]:
                                 one_day["para_{}".format(para_num)][
                                     "week_{}".format(week_num)] = []  # Инициализация списка
@@ -370,15 +368,13 @@ class Reader:
 if __name__ == "__main__":
 
     Downloader = Downloader(path_to_error_log='logs/downloadErrorLog.csv', file_dir='xls/',
-                                         file_type='xlsx')
+                            file_type='xlsx')
     Downloader.download()
 
     for i in os.scandir("xls"):
         xlsx_path = os.path.join("xls", i.name)
         print(xlsx_path)
 
-        # reader = Reader(xlsx_path, "table.db")
-        # res = reader.read(write_to_json_file=False, write_to_csv_file=False, write_to_db=True)
         try:
             reader = Reader(xlsx_path, "table.db")
             res = reader.read(write_to_json_file=False, write_to_csv_file=False, write_to_db=True)
@@ -390,7 +386,6 @@ if __name__ == "__main__":
 
     # reader = Reader("xls/КБиСП 4 курс 1 сем.xlsx", "table.db")
     # res = reader.read(write_to_json_file=False, write_to_csv_file=False, write_to_db=True)
-
     # print(res)
 
     # reader = Reader
