@@ -384,10 +384,6 @@ if __name__ == "__main__":
                 file.write(str(datetime.datetime.now()) + ':' + str(i) + 'message:' + str(err) + '\n')
             continue
 
-    # reader = Reader("xls/КБиСП 4 курс 1 сем.xlsx", "table.db")
-    # res = reader.read(write_to_json_file=False, write_to_csv_file=False, write_to_db=True)
-    # print(res)
-
     # reader = Reader
     # result = reader.format_name("2,6,10,14 н Экология\n4,8,12,16 Правоведение")
     # print(result)
