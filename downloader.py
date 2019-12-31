@@ -2,8 +2,10 @@ from urllib import request
 import sys
 import subprocess
 from bs4 import BeautifulSoup
+import os
 import os.path
 import datetime
+import re
 
 
 def install(package):
@@ -32,11 +34,20 @@ except ImportError:
 
 
 class Downloader:
-    def __init__(self, path_to_error_log='errors/downloadErrorLog.csv', file_dir='xls/', file_type='xls'):
+    def __init__(self, path_to_error_log='errors/downloadErrorLog.csv', base_file_dir='xls/'):
+        """
+
+        :type file_type: list
+        """
         self.url = 'http://www.mirea.ru/education/schedule-main/schedule/'
         self.path_to_error_log = path_to_error_log
-        self.file_dir = file_dir
-        self.file_type = file_type
+        self.base_file_dir = base_file_dir
+        self.file_type = ['xls', 'xlsx']
+        self.download_dir = {
+            "zach": [r'zach', r'zachety'],
+            "exam": [r'zima', r'ekz', r'ekzam', r'ekzameny'],
+            "semester": [r'']
+        }
 
     @staticmethod
     def save_file(url, path):
@@ -47,6 +58,12 @@ class Downloader:
         resp = request.urlopen(url).read()
         with open(path, 'wb') as file:
             file.write(resp)
+
+    def get_dir(self, file_name):
+        for dir_name in self.download_dir:
+            for pattern in self.download_dir[dir_name]:
+                if re.search(pattern, file_name, flags=re.IGNORECASE):
+                    return dir_name
 
     def download(self):
 
@@ -61,18 +78,23 @@ class Downloader:
         url_files = [x['href'].replace('https', 'http') for x in xls_list]  # Сохранение списка адресов сайтов
         progress_all = len(url_files)
 
-        i = 0
+        count_file = 0
         # Сохранение файлов
         for url_file in url_files:  # цикл по списку
-            path_file = url_file.split('/')[-1]
+            file_name = url_file.split('/')[-1]
+            print(file_name)
             try:
-                if path_file.split('.')[1] == self.file_type:
-                    path_file = os.path.join(self.file_dir, path_file)
-                    self.save_file(url_file, path_file)
-                    i += 1  # Счетчик для отображения скаченных файлов в %
-                    print('{} -- {}'.format(path_file, i / progress_all * 100))
+                if file_name.split('.')[1] in self.file_type:
+                    subdir = self.get_dir(file_name)
+                    path_to_file = os.path.join(self.base_file_dir, subdir, file_name)
+                    if not os.path.isdir(os.path.join(self.base_file_dir, subdir)):
+                        os.makedirs(os.path.join(self.base_file_dir, subdir), exist_ok=False)
+
+                    self.save_file(url_file, path_to_file)
+                    count_file += 1  # Счетчик для отображения скаченных файлов в %
+                    print('{} -- {}'.format(path_to_file, count_file / progress_all * 100))
                 else:
-                    i += 1  # Счетчик для отображения скаченных файлов в %
+                    count_file += 1  # Счетчик для отображения скаченных файлов в %
 
             except Exception as err:
                 with open(self.path_to_error_log, 'a+') as file:
@@ -82,5 +104,5 @@ class Downloader:
 
 
 if __name__ == "__main__":
-    Downloader = Downloader(path_to_error_log='logs/downloadErrorLog.csv', file_dir='xls/', file_type='xlsx')
+    Downloader = Downloader(path_to_error_log='logs/downloadErrorLog.csv', base_file_dir='xls/')
     Downloader.download()
