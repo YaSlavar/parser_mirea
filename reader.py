@@ -124,59 +124,80 @@ class Reader:
                 'ПЯТНИЦА': 5,
                 'СУББОТА': 6
             }
-            return days[day_name]
+            return days[day_name.upper()]
 
-        column_range = []
-        timetable = {}
-        group_list = []
-        # строка с названиями групп
-        row = self.sheets.row(1)
-        for is_group in row:  # Поиск названий групп
-            group = str(is_group.value)
-            group = re.search(r"([А-Я]+-\w+-\w+)", group)
-            if group:  # Если название найдено, то получение расписания этой группы
+        def get_month_num(month_name):
+            months = {
+                'ЯНВАРЬ': 1,
+                'ФЕВРАЛЬ': 2,
+                'МАРТ': 3,
+                'АПРЕЛЬ': 4,
+                'МАЙ': 5,
+                'ИЮНЬ': 6,
+                'ИЮЛЬ': 7,
+                'АВГУСТ': 8,
+                'СЕНТЯБРЬ': 9,
+                'ОКТЯБРЬ': 10,
+                'НОЯБРЬ': 11,
+                'ДЕКАБРЬ': 12
+            }
+            return months[month_name.upper().replace(' ', '')]
 
-                if not group_list:  # инициализация списка диапазонов пар
-                    column_range = {
-                        1: [],
-                        2: [],
-                        3: [],
-                        4: [],
-                        5: [],
-                        6: []
-                    }
+        def get_column_range_semester(xlsx_sheet, group_name_cell, group_name_row_index):
+            """
 
-                    inicial_row_num = 3  # Номер строки, с которой начинается отсчет пар
+            :param group_name_row_index: 
+            :param xlsx_sheet:
+            :param group_name_cell:
+            :return:
+            """
+            # инициализация списка диапазонов пар
+            week_range = {
+                1: [],
+                2: [],
+                3: [],
+                4: [],
+                5: [],
+                6: []
+            }
 
-                    para_count = 0  # Счетчик количества пар
-                    # Перебор столбца с номерами пар и вычисление на основании количества пар в день диапазона выбора ячеек
+            initial_row_num = group_name_row_index + 1  # Номер строки, с которой начинается отсчет пар
+            para_count = 0  # Счетчик количества пар
+            # Перебор столбца с номерами пар и вычисление на основании количества пар в день диапазона выбора ячеек
 
-                    day_num_val, para_num_val, para_time_val, para_week_num_val = 0, 0, 0, 0
-                    for para_num in range(inicial_row_num, len(self.sheets.col(row.index(is_group) - 4))):
+            day_num_val, para_num_val, para_time_val, para_week_num_val = 0, 0, 0, 0
+            for para_num in range(initial_row_num, len(xlsx_sheet.col(group_name_row.index(group_name_cell)))):
 
-                        day_num_col = self.sheets.cell(para_num, row.index(is_group) - 5)
-                        if day_num_col.value != '':
-                            day_num_val = get_day_num(day_num_col.value)
+                day_num_col = xlsx_sheet.cell(para_num, group_name_row.index(group_name_cell) - 5)
+                if day_num_col.value != '':
 
-                        para_num_col = self.sheets.cell(para_num, row.index(is_group) - 4)
-                        if para_num_col.value != '':
-                            para_num_val = para_num_col.value
-                            if isinstance(para_num_val, float):
-                                para_num_val = int(para_num_val)
-                                if para_num_val > para_count:
-                                    para_count = para_num_val
+                    day_num_val = get_day_num(day_num_col.value)
 
-                        para_time_col = self.sheets.cell(para_num, row.index(is_group) - 3)
-                        if para_time_col.value != '':
-                            para_time_val = para_time_col.value.replace('-', ':')
-                        para_week_num = self.sheets.cell(para_num, row.index(is_group) - 1)
-                        if para_week_num.value != '':
-                            if para_week_num.value == 'I':
-                                para_week_num_val = 1
-                            else:
-                                para_week_num_val = 2
+                para_num_col = xlsx_sheet.cell(para_num, group_name_row.index(group_name_cell) - 4)
+                if para_num_col.value != '':
+                    para_num_val = para_num_col.value
+                    if isinstance(para_num_val, float):
+                        para_num_val = int(para_num_val)
+                        if para_num_val > para_count:
+                            para_count = para_num_val
 
-                        para_string_index = para_num
+                para_time_col = xlsx_sheet.cell(para_num, group_name_row.index(group_name_cell) - 3)
+                if para_time_col.value != '':
+                    para_time_val = str(para_time_col.value).replace('-', ':')
+
+                para_week_num = xlsx_sheet.cell(para_num, group_name_row.index(group_name_cell) - 1)
+                if para_week_num.value != '':
+                    if para_week_num.value == 'I':
+                        para_week_num_val = 1
+                    elif para_week_num.value == 'II':
+                        para_week_num_val = 2
+                else:
+                    if para_week_num_val == 1:
+                        para_week_num_val = 2
+                    else:
+                        para_week_num_val = 1
+
+                para_string_index = para_num
 
                 if re.findall(r'\d+:\d+', str(para_time_val), flags=re.A):
                     para_range = (para_num_val, para_time_val, para_week_num_val, para_string_index)
