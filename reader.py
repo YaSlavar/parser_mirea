@@ -626,7 +626,7 @@ class Reader:
 
 
 if __name__ == "__main__":
-    Downloader = Downloader(path_to_error_log='logs/downloadErrorLog.csv', base_file_dir='xls/')
+    Downloader = Downloader(path_to_error_log='logs/downloadErrorLog.csv', base_file_dir='xls/', except_types=['zach', 'exam'])
     Downloader.download()
 
     reader = Reader(path_to_db="table.db")

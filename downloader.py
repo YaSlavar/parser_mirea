@@ -34,7 +34,7 @@ except ImportError:
 
 
 class Downloader:
-    def __init__(self, path_to_error_log='errors/downloadErrorLog.csv', base_file_dir='xls/'):
+    def __init__(self, path_to_error_log='errors/downloadErrorLog.csv', base_file_dir='xls/', except_types=None):
         """
 
         :type file_type: list
@@ -43,9 +43,10 @@ class Downloader:
         self.path_to_error_log = path_to_error_log
         self.base_file_dir = base_file_dir
         self.file_type = ['xls', 'xlsx']
+        self.except_types = except_types
         self.download_dir = {
             "zach": [r'zach', r'zachety'],
-            "exam": [r'zima', r'ekz', r'ekzam', r'ekzameny'],
+            "exam": [r'zima', r'ekz', r'ekzam', r'ekzameny', r'sessiya'],
             "semester": [r'']
         }
 
@@ -82,15 +83,19 @@ class Downloader:
         # Сохранение файлов
         for url_file in url_files:  # цикл по списку
             file_name = url_file.split('/')[-1]
-            print(file_name)
+            # print(file_name)
             try:
                 if file_name.split('.')[1] in self.file_type:
                     subdir = self.get_dir(file_name)
                     path_to_file = os.path.join(self.base_file_dir, subdir, file_name)
-                    if not os.path.isdir(os.path.join(self.base_file_dir, subdir)):
-                        os.makedirs(os.path.join(self.base_file_dir, subdir), exist_ok=False)
+                    if subdir not in self.except_types:
+                        if not os.path.isdir(os.path.join(self.base_file_dir, subdir)):
+                            os.makedirs(os.path.join(self.base_file_dir, subdir), exist_ok=False)
 
-                    self.save_file(url_file, path_to_file)
+                        self.save_file(url_file, path_to_file)
+                    else:
+                        continue
+
                     count_file += 1  # Счетчик для отображения скаченных файлов в %
                     print('{} -- {}'.format(path_to_file, count_file / progress_all * 100))
                 else:
@@ -104,5 +109,5 @@ class Downloader:
 
 
 if __name__ == "__main__":
-    Downloader = Downloader(path_to_error_log='logs/downloadErrorLog.csv', base_file_dir='xls/')
+    Downloader = Downloader(path_to_error_log='logs/downloadErrorLog.csv', base_file_dir='xls/', except_types=None)
     Downloader.download()
