@@ -1,44 +1,30 @@
 from urllib import request
 import sys
 import subprocess
-from bs4 import BeautifulSoup
 import os
 import os.path
 import datetime
 import re
-
-
-def install(package):
-    """
-    Устанавливает пакет
-    :param package: название пакета (str)
-    :return: код завершения процесса (int) или текст ошибки (str)
-    """
-    try:
-        result = subprocess.check_call([sys.executable, '-m', 'pip', 'install', package])
-    except subprocess.CalledProcessError as result:
-        return result
-
-    return result
-
-
-try:
-    import xlrd
-except ImportError:
-    exit_code = install("beautifulsoup4")
-    if exit_code == 0:
-        import xlrd
-    else:
-        print("При установке пакета возникла ошибка! {}".format(exit_code))
-        exit(0)
+from bs4 import BeautifulSoup
 
 
 class Downloader:
-    def __init__(self, path_to_error_log='errors/downloadErrorLog.csv', base_file_dir='xls/', except_types=None):
+    def __init__(self, path_to_error_log='errors/downloadErrorLog.csv', base_file_dir='xls/', except_types=[]):
         """
 
         :type file_type: list
         """
+
+        try:
+            from bs4 import BeautifulSoup
+        except ImportError:
+            exit_code = self.install("beautifulsoup4")
+            if exit_code == 0:
+                from bs4 import BeautifulSoup
+            else:
+                print("При установке пакета возникла ошибка! {}".format(exit_code))
+                exit(0)
+
         self.url = 'http://www.mirea.ru/education/schedule-main/schedule/'
         self.path_to_error_log = path_to_error_log
         self.base_file_dir = base_file_dir
@@ -51,14 +37,37 @@ class Downloader:
         }
 
     @staticmethod
+    def install(package):
+        """
+        Устанавливает пакет
+        :param package: название пакета (str)
+        :return: код завершения процесса (int) или текст ошибки (str)
+        """
+        try:
+            result = subprocess.check_call(['pip', 'install', package])
+        except subprocess.CalledProcessError as result:
+            return result
+
+        return result
+
+    @staticmethod
     def save_file(url, path):
         """
         :param url: Путь до web страницы
         :param path: Путь с именем для сохраняемого файла
         """
-        resp = request.urlopen(url).read()
-        with open(path, 'wb') as file:
-            file.write(resp)
+        def download(download_url, download_path):
+            bin_file = request.urlopen(download_url).read()
+            with open(download_path, 'wb') as file:
+                file.write(bin_file)
+
+        if os.path.isfile(path):
+            old_file_size = os.path.getsize(path)
+            new_file_size = request.urlopen(url).length
+            if old_file_size != new_file_size:
+                download(url, path)
+        else:
+            download(url, path)
 
     def get_dir(self, file_name):
         for dir_name in self.download_dir:
@@ -75,6 +84,7 @@ class Downloader:
         parse = BeautifulSoup(site, "html.parser")  # Объект BS с параметром парсера
         xls_list = parse.findAll('a', {"class": "xls"})  # поиск в HTML Всех классов с разметой Html
 
+
         # Списки адресов на файлы
         url_files = [x['href'].replace('https', 'http') for x in xls_list]  # Сохранение списка адресов сайтов
         progress_all = len(url_files)
@@ -82,10 +92,9 @@ class Downloader:
         count_file = 0
         # Сохранение файлов
         for url_file in url_files:  # цикл по списку
-            file_name = url_file.split('/')[-1]
-            # print(file_name)
+            file_name = os.path.split(url_file)[1]
             try:
-                if file_name.split('.')[1] in self.file_type:
+                if os.path.splitext(file_name)[1].replace('.', '') in self.file_type:
                     subdir = self.get_dir(file_name)
                     path_to_file = os.path.join(self.base_file_dir, subdir, file_name)
                     if subdir not in self.except_types:
@@ -109,5 +118,5 @@ class Downloader:
 
 
 if __name__ == "__main__":
-    Downloader = Downloader(path_to_error_log='logs/downloadErrorLog.csv', base_file_dir='xls/', except_types=None)
+    Downloader = Downloader(path_to_error_log='logs/downloadErrorLog.csv', base_file_dir='xls/', except_types=[])
     Downloader.download()

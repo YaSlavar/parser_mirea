@@ -9,33 +9,9 @@ import datetime
 from itertools import cycle
 from sqlite3.dbapi2 import Connection
 import traceback
-
+import xlrd
 from downloader import Downloader
 
-
-def install(package):
-    """
-    Устанавливает пакет
-    :param package: название пакета (str)
-    :return: код завершения процесса (int) или текст ошибки (str)
-    """
-    try:
-        result = subprocess.check_call([sys.executable, '-m', 'pip', 'install', package])
-    except subprocess.CalledProcessError as result:
-        return result
-
-    return result
-
-
-try:
-    import xlrd
-except ImportError:
-    exit_code = install("xlrd")
-    if exit_code == 0:
-        import xlrd
-    else:
-        print("При установке пакета возникла ошибка! {}".format(exit_code))
-        exit(0)
 
 
 class Reader:
@@ -46,6 +22,17 @@ class Reader:
         """Инициализация клсса
             src(str): Абсолютный путь к XLS файлу
         """
+
+        try:
+            import xlrd
+        except ImportError:
+            exit_code = self.install("xlrd")
+            if exit_code == 0:
+                import xlrd
+            else:
+                print("При установке пакета возникла ошибка! {}".format(exit_code))
+                exit(0)
+
         # Имя файла, в который записывается расписание групп в JSON формате
         if path_to_json is not None:
             self.json_file = path_to_json
@@ -65,6 +52,22 @@ class Reader:
             self.db_file = 'table.db'
 
         self.log_file_path = 'logs/ErrorLog.txt'
+
+
+
+    @staticmethod
+    def install(package):
+        """
+        Устанавливает пакет
+        :param package: название пакета (str)
+        :return: код завершения процесса (int) или текст ошибки (str)
+        """
+        try:
+            result = subprocess.check_call(['pip', 'install', package])
+        except subprocess.CalledProcessError as result:
+            return result
+
+        return result
 
     def run(self, xlsx_dir, write_to_json_file=False, write_to_csv_file=False, write_to_db=False):
         """
@@ -378,6 +381,7 @@ class Reader:
         temp_name = temp_name.replace(" ", "  ")
 
         temp_name = re.sub(r"(кр\. {2,})", "кр.", temp_name, flags=re.A)
+        temp_name = re.sub(r"((, *|)кроме {1,})", " кр.", temp_name, flags=re.A)
         temp_name = re.sub(r"(н[\d,. ]*\+)", "", temp_name, flags=re.A)
 
         temp_name = re.findall(r"((?:\s*[\W\s]*)(?:|кр[ .]\s*|\d+-\d+|[\d,. ]*)\s*\s*(?:|[\W\s]*|\D*)*)(?:\s\s|\Z|\n)",
@@ -398,7 +402,7 @@ class Reader:
                         else:
                             _except = re.findall(r"(\d+)", item, flags=re.A)
                         item = re.sub(r"(кр[. \w])", "", item, flags=re.A)
-                        item = re.sub(r"(\d+[,. ]+)", "", item, flags=re.A)
+                        item = re.sub(r"(\d+[,. н]+)", "", item, flags=re.A)
                         name = re.sub(r"( н[. ])", "", item, flags=re.A)
                     elif if_include:
                         if re.search(r"\d+-\d+", item):
@@ -647,39 +651,8 @@ class Reader:
 
 
 if __name__ == "__main__":
-    Downloader = Downloader(path_to_error_log='logs/downloadErrorLog.csv', base_file_dir='xls/', except_types=['zach', 'exam'])
-    Downloader.download()
+    # Downloader = Downloader(path_to_error_log='logs/downloadErrorLog.csv', base_file_dir='xls/')
+    # Downloader.download()
 
     reader = Reader(path_to_db="table.db")
-    res = reader.run('xls', write_to_db=True, write_to_json_file=True)
-
-    # reader = Reader
-    # result = reader.format_name("2,6,10,14 н Экология\n4,8,12,16 Правоведение")
-    # print(result)
-    # result = reader.format_name("Деньги, кредит, банки кр. 2,8,10 н.")
-    # print(result)
-    # result = reader.format_name("Орг. Химия (1-8 н.)")
-    # print(result)
-    # result = reader.format_name("Web-технологии в деятельности экономических субьектов")
-    # print(result)
-    # result = reader.format_name("1,5,9,13 н Оперционные системы\n3,7,11,15 н  Оперционные системы")
-    # print(result)
-    # result = reader.format_name("3,7,11,15  н Физика                                                     кр. 5,8,13.17 н Организация ЭВМ и Систем")
-    # print(result)
-    # result = reader.format_name("2,6,10,14 н Кроссплатформенная среда исполнения программного обеспечения 4,8,12,16 н Кроссплатформенная среда исполнения программного обеспечения")
-    # print(result)
-    # result = reader.format_name("кр 1,13 н Интеллектуальные информационные системы")
-    # print(result)
-    # result = reader.format_name("кр1 н Модели информационных процессов и систем")
-    # print(result)
-    # result = reader.format_name("Разработка ПАОИиАС 2,6,10,14 н.+4,8,12,16н.")
-    # print(result)
-    #
-    # result = reader.format_prepod_name("Козлова Г.Г.\nИсаев Р.А.")
-    # print(result)
-    #
-    # result = reader.format_room_name("В-78*\nБ-105")
-    # print(result)
-    #
-    # result = reader.format_room_name("23452     Б-105")
-    # print(result)
+    reader.run('xls', write_to_db=True, write_to_json_file=True)
