@@ -585,7 +585,7 @@ class Reader:
                         if exception:
                             one_para["exception"] = exception
 
-                        if name and room:
+                        if name:
                             if "week_{}".format(week_num) not in one_day["para_{}".format(para_num)]:
                                 one_day["para_{}".format(para_num)][
                                     "week_{}".format(week_num)] = []  # Инициализация списка

@@ -66,6 +66,8 @@ class Downloader:
             new_file_size = request.urlopen(url).length
             if old_file_size != new_file_size:
                 download(url, path)
+            else:
+                print(f"Skip download file: {path}")
         else:
             download(url, path)
 
