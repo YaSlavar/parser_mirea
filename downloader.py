@@ -66,10 +66,12 @@ class Downloader:
             new_file_size = request.urlopen(url).length
             if old_file_size != new_file_size:
                 download(url, path)
+                return "download"
             else:
-                print(f"Skip download file: {path}")
+                return "skip"
         else:
             download(url, path)
+            return "download"
 
     def get_dir(self, file_name):
         for dir_name in self.download_dir:
@@ -103,12 +105,14 @@ class Downloader:
                         if not os.path.isdir(os.path.join(self.base_file_dir, subdir)):
                             os.makedirs(os.path.join(self.base_file_dir, subdir), exist_ok=False)
 
-                        self.save_file(url_file, path_to_file)
+                        result = self.save_file(url_file, path_to_file)
+                        count_file += 1  # Счетчик для отображения скаченных файлов в %
+
+                        print('{} : {} -- {}'.format(result, path_to_file, count_file / progress_all * 100))
                     else:
                         continue
 
-                    count_file += 1  # Счетчик для отображения скаченных файлов в %
-                    print('{} -- {}'.format(path_to_file, count_file / progress_all * 100))
+
                 else:
                     count_file += 1  # Счетчик для отображения скаченных файлов в %
 
