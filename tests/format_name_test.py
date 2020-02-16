@@ -78,6 +78,10 @@ class Format_name_test(unittest.TestCase):
         correct_result = ['23452', 'Б-105']
         self.assertEqual(result, correct_result)
 
+    def test_format_room_name_example_3(self):
+        result = self.reader.format_room_name('В-78*А318 \n429')
+        correct_result = ['Проспект Вернадского, д.78 А318 429']
+        self.assertEqual(result, correct_result)
 
 if __name__ == '__main__':
     unittest.main()

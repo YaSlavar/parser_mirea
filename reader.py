@@ -354,7 +354,7 @@ class Reader:
         for pattern in notes_dict:
             regex_result = re.findall(pattern, string, flags=re.A)
             if regex_result:
-                string = string.replace(' ', '').replace('*', '').replace('\n', '')
+                string = string.replace('  ', '').replace('*', '').replace('\n', '')
 
                 string = re.sub(regex_result[0], notes_dict[regex_result[0]] + " ", string, flags=re.A)
 
@@ -656,3 +656,4 @@ if __name__ == "__main__":
 
     reader = Reader(path_to_db="table.db")
     reader.run('xls', write_to_db=True, write_to_json_file=True)
+
