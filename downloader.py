@@ -1,4 +1,6 @@
 from urllib import request
+import requests
+import traceback
 import sys
 import subprocess
 import os
@@ -25,7 +27,7 @@ class Downloader:
                 print("При установке пакета возникла ошибка! {}".format(exit_code))
                 exit(0)
 
-        self.url = 'http://www.mirea.ru/education/schedule-main/schedule/'
+        self.url = 'https://www.mirea.ru/schedule/'
         self.path_to_error_log = path_to_error_log
         self.base_file_dir = base_file_dir
         self.file_type = ['xls', 'xlsx']
@@ -56,10 +58,22 @@ class Downloader:
         :param url: Путь до web страницы
         :param path: Путь с именем для сохраняемого файла
         """
+
         def download(download_url, download_path):
-            bin_file = request.urlopen(download_url).read()
-            with open(download_path, 'wb') as file:
-                file.write(bin_file)
+
+            with requests.get(download_url, stream=True) as r:
+                r.raise_for_status()
+                with open(download_path, 'wb') as f:
+                    for chunk in r.iter_content(chunk_size=8192):
+                        if chunk:  # filter out keep-alive new chunks
+                            f.write(chunk)
+
+            # bin_file = request.urlopen(download_url)
+            # print(bin_file)
+            # bin_file = requests.get(download_url)
+            # print(bin_file)
+            # with open(download_path, 'wb') as file:
+            #     file.write(bin_file.raw)
 
         if os.path.isfile(path):
             old_file_size = os.path.getsize(path)
@@ -82,12 +96,13 @@ class Downloader:
     def download(self):
 
         response = request.urlopen(self.url)  # Запрос страницы
-        site = str(response.read())  # Чтение страницы в переменную
+        # print(response)
+        site = str(response.read().decode())  # Чтение страницы в переменную
         response.close()
 
         parse = BeautifulSoup(site, "html.parser")  # Объект BS с параметром парсера
-        xls_list = parse.findAll('a', {"class": "xls"})  # поиск в HTML Всех классов с разметой Html
-
+        # xls_list = parse.findAll('a', {"class": "xls"})  # поиск в HTML Всех классов с разметой Html
+        xls_list = parse.findAll('a', {"class": "uk-link-toggle"})  # поиск в HTML Всех классов с разметой Html
 
         # Списки адресов на файлы
         url_files = [x['href'].replace('https', 'http') for x in xls_list]  # Сохранение списка адресов сайтов
@@ -104,7 +119,6 @@ class Downloader:
                     if subdir not in self.except_types:
                         if not os.path.isdir(os.path.join(self.base_file_dir, subdir)):
                             os.makedirs(os.path.join(self.base_file_dir, subdir), exist_ok=False)
-
                         result = self.save_file(url_file, path_to_file)
                         count_file += 1  # Счетчик для отображения скаченных файлов в %
 
@@ -117,6 +131,7 @@ class Downloader:
                     count_file += 1  # Счетчик для отображения скаченных файлов в %
 
             except Exception as err:
+                traceback.print_exc()
                 with open(self.path_to_error_log, 'a+') as file:
                     file.write(
                         str(datetime.datetime.now()) + ': ' + url_file + ' message:' + str(err) + '\n', )

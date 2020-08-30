@@ -1,4 +1,5 @@
 from reader import Reader
+from downloader import Downloader
 from writer import New_to_old_table
 import sys
 import os.path
@@ -45,6 +46,7 @@ if __name__ == "__main__":
         mode = int(input("Выберите режим работы: \n"
                          "1) Конвертация на основе настроек файла config.json\n"
                          "2) Конвертация на основе пользовательского ввода (ручной ввод данных о конвертируемых файлах и т.д.)\n"
+                         "3) Загрузить расписание с сайта МИРЭА и сформировать файл БД SQLite3\n"
                          "0) Завершить выполнение скрипта!\n"))
 
         try:
@@ -65,6 +67,15 @@ if __name__ == "__main__":
             elif mode == 2:
                 run()
                 print("Конвертация успешно выполнена!\n")
+                continue
+
+            elif mode == 3:
+                Downloader = Downloader(path_to_error_log='logs/downloadErrorLog.csv', base_file_dir='xls/')
+                Downloader.download()
+
+                reader = Reader(path_to_db="table.db")
+                reader.run('xls', write_to_db=True, write_to_json_file=True)
+                print("\nКонвертация успешно выполнена!\n\n")
                 continue
 
             elif mode == 0:
