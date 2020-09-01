@@ -1,7 +1,6 @@
 from urllib import request
 import requests
 import traceback
-import sys
 import subprocess
 import os
 import os.path
@@ -60,9 +59,10 @@ class Downloader:
         """
 
         def download(download_url, download_path):
-
             with requests.get(download_url, stream=True) as r:
                 r.raise_for_status()
+                if os.path.isfile(download_path):
+                    os.remove(download_path)
                 with open(download_path, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=8192):
                         if chunk:  # filter out keep-alive new chunks
@@ -77,7 +77,7 @@ class Downloader:
 
         if os.path.isfile(path):
             old_file_size = os.path.getsize(path)
-            new_file_size = request.urlopen(url).length
+            new_file_size = len(requests.get(url).content)
             if old_file_size != new_file_size:
                 download(url, path)
                 return "download"
@@ -111,7 +111,9 @@ class Downloader:
         count_file = 0
         # Сохранение файлов
         for url_file in url_files:  # цикл по списку
-            file_name = os.path.split(url_file)[1]
+            divided_path = os.path.split(url_file)
+            subdir = os.path.split(divided_path[0])[1]
+            file_name = subdir + divided_path[1]
             try:
                 if os.path.splitext(file_name)[1].replace('.', '') in self.file_type:
                     subdir = self.get_dir(file_name)
