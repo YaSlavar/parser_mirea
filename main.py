@@ -74,7 +74,7 @@ if __name__ == "__main__":
                 Downloader.download()
 
                 reader = Reader(path_to_db="table.db")
-                reader.run('xls', write_to_db=True, write_to_json_file=True)
+                reader.run('xls', write_to_db=True, write_to_json_file=False)
                 print("\nКонвертация успешно выполнена!\n\n")
                 continue
 
