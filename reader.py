@@ -9,7 +9,6 @@ from itertools import cycle
 from sqlite3.dbapi2 import Connection
 import traceback
 import xlrd
-from downloader import Downloader
 
 
 class Reader:
@@ -926,8 +925,6 @@ class Reader:
 
 
 if __name__ == "__main__":
-    Downloader = Downloader(path_to_error_log='logs/downloadErrorLog.csv', base_file_dir='xls/')
-    Downloader.download()
 
     reader = Reader(path_to_db="table.db")
     reader.run('xls', write_to_db=True, write_to_new_db=True, write_to_json_file=False, write_to_csv_file=False)
