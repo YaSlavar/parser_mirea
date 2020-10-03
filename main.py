@@ -16,7 +16,7 @@ def run(start_semester=None, input_file=None, output_file=None, groups=None):
         out_file = os.path.join(os.path.dirname(sys.argv[0]), out_file + ".xlsx")
         print(out_file)
         reader = Reader(source_file, base_name)
-        group_name_list = reader.read(write_to_json_file=True, write_to_csv_file=True, write_to_db=True)
+        group_name_list = reader.read(write_to_json_file=True, write_to_csv_file=True, write_to_db=True, write_to_new_db=True)
         start_date = input("Введите дату начала семестра. Например: 09.02.2018 ...  ")
         print("В текущем файле имеюися следующие группы:")
         for name in group_name_list:
@@ -33,7 +33,7 @@ def run(start_semester=None, input_file=None, output_file=None, groups=None):
         out_file = os.path.join(os.path.dirname(sys.argv[0]), output_file)
 
         reader = Reader(source_file, base_name)
-        group_name_list = reader.read(write_to_json_file=True, write_to_csv_file=True, write_to_db=True)
+        group_name_list = reader.read(write_to_json_file=True, write_to_csv_file=True, write_to_db=True, write_to_new_db=True)
         for name in group_name_list:
             print(name)
         writer = New_to_old_table(template, base_name, out_file, start_semester, groups)

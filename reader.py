@@ -14,9 +14,10 @@ from downloader import Downloader
 
 class Reader:
     """Класс для парсинга расписания MIREA из xlsx файлов"""
+    connect_to_old_db: Connection
     connect_to_db: Connection
 
-    def __init__(self, path_to_json=None, path_to_csv=None, path_to_db=None):
+    def __init__(self, path_to_json=None, path_to_csv=None, path_to_db=None, path_to_new_db=None):
         """Инициализация клсса
             src(str): Абсолютный путь к XLS файлу
         """
@@ -31,23 +32,36 @@ class Reader:
                 print("При установке пакета возникла ошибка! {}".format(exit_code))
                 exit(0)
 
+        self.result_dir = 'output'
+        if not os.path.exists(self.result_dir):
+            os.makedirs(self.result_dir)
+
         # Имя файла, в который записывается расписание групп в JSON формате
         if path_to_json is not None:
             self.json_file = path_to_json
         else:
             self.json_file = "table.json"
+        self.json_file = os.path.join(self.result_dir, self.json_file)
 
         # Имя файла, в который записывается расписание групп в CSV формате
         if path_to_csv is not None:
             self.csv_file = path_to_csv
         else:
             self.csv_file = "table.csv"
+        self.csv_file = os.path.join(self.result_dir, self.csv_file)
 
         # Путь к файлу базы данных
         if path_to_db is not None:
-            self.db_file = path_to_db
+            self.db_old_file = path_to_db
         else:
-            self.db_file = 'table.db'
+            self.db_old_file = 'table.db'
+        self.db_old_file = os.path.join(self.result_dir, self.db_old_file)
+
+        if path_to_new_db is not None:
+            self.db_file = path_to_new_db
+        else:
+            self.db_file = 'timetable.db'
+        self.db_file = os.path.join(self.result_dir, self.db_file)
 
         self.log_file_path = 'logs/ErrorLog.txt'
 
@@ -89,6 +103,17 @@ class Reader:
             'ДЕКАБРЬ': 12
         }
 
+        self.time_dict = {
+            "9:00": 1,
+            "10:40": 2,
+            "12:40": 3,
+            "14:20": 4,
+            "16:20": 5,
+            "18:00": 6,
+            "18:30": 7,
+            "20:10": 8
+        }
+
     @staticmethod
     def install(package):
         """
@@ -103,7 +128,7 @@ class Reader:
 
         return result
 
-    def run(self, xlsx_dir, write_to_json_file=False, write_to_csv_file=False, write_to_db=False):
+    def run(self, xlsx_dir, write_to_json_file=False, write_to_csv_file=False, write_to_db=False, write_to_new_db=False):
         """
         Выполнение парсинга данных
         :param write_to_db:
@@ -128,10 +153,11 @@ class Reader:
             """
             return self.doc_type_list[doc_type_str]
 
-        remove_old_file(self.db_file)
+        remove_old_file(self.db_old_file)
         remove_old_file(self.json_file)
         remove_old_file(self.csv_file)
 
+        self.connect_to_old_db = sqlite3.connect(self.db_old_file)
         self.connect_to_db = sqlite3.connect(self.db_file)
 
         for path, dirs, files in os.walk(xlsx_dir):
@@ -141,7 +167,8 @@ class Reader:
 
                 try:
                     self.read(path_to_xlsx_file, xlsx_doc_type, write_to_json_file=write_to_json_file,
-                              write_to_csv_file=write_to_csv_file, write_to_db=write_to_db)
+                              write_to_csv_file=write_to_csv_file, write_to_db=write_to_db,
+                              write_to_new_db=write_to_new_db)
                 except Exception as err:
                     print(err, traceback.format_exc())
                     with open(self.log_file_path, 'a+') as log_file:
@@ -150,7 +177,8 @@ class Reader:
                                 traceback.format_exc()) + '\n')
                     continue
 
-    def read(self, xlsx_path, doc_type, write_to_json_file=False, write_to_csv_file=False, write_to_db=False):
+    def read(self, xlsx_path, doc_type, write_to_json_file=False, write_to_csv_file=False, write_to_db=False,
+             write_to_new_db=False):
         """Объединяет расписания отдельных групп и записывает в файлы
             :param xlsx_path:
             :param doc_type:
@@ -360,7 +388,9 @@ class Reader:
         if write_to_json_file is not False:  # Запись в JSON файл
             self.write_to_json(timetable, doc_type)
         if write_to_csv_file is not False or write_to_db is not False:  # Запись в CSV файл, Запись в базу данных
-            self.write(doc_type, timetable, write_to_csv_file, write_to_db)
+            self.write_to_csv_and_old_db(doc_type, timetable, write_to_csv_file, write_to_db)
+        if write_to_new_db is not False:
+            self.write_to_db(doc_type, timetable, write_to_db)
         return group_list
 
     @staticmethod
@@ -375,6 +405,7 @@ class Reader:
 
     @staticmethod
     def format_teacher_name(cell):
+        cell = str(cell)
         return re.split(r' {2,}|\n', cell)
 
     def format_room_name(self, cell):
@@ -397,9 +428,9 @@ class Reader:
         """
 
         def if_diapason_week(lesson_string):
-            start_week = re.findall(r"\d+-", lesson_string)
+            start_week = re.findall(r"\d+\s+-", lesson_string)
             start_week = re.sub("-", "", start_week[0])
-            end_week = re.findall(r"-\d+", lesson_string)
+            end_week = re.findall(r"-\d+\s+", lesson_string)
             end_week = re.sub("-", "", end_week[0])
             weeks = []
             for week in range(int(start_week), int(end_week) + 1):
@@ -408,12 +439,19 @@ class Reader:
 
         result = []
         temp_name = temp_name.replace(" ", "  ")
+        temp_name = temp_name.replace(";", ";  ")
 
+        temp_name = re.sub(r"(\s+-\s+(?:лк|пр)(?:;|))", "", temp_name, flags=re.A)
+        substr = re.findall(r"(\s+н(?:\.|)\s+)\d+", temp_name)
+        if substr:
+            temp_name = re.sub(substr[0], " ", temp_name, flags=re.A)
+
+        temp_name = re.sub(r"(\d+)", r"\1 ", temp_name, flags=re.A)
         temp_name = re.sub(r"(кр\. {2,})", "кр.", temp_name, flags=re.A)
         temp_name = re.sub(r"((, *|)кроме {1,})", " кр.", temp_name, flags=re.A)
-        temp_name = re.sub(r"(н[\d,. ]*\+)", "", temp_name, flags=re.A)
+        temp_name = re.sub(r"(н[\d,. ]*[+;])", "", temp_name, flags=re.A)
 
-        temp_name = re.findall(r"((?:\s*[\W\s]*)(?:|кр[ .]\s*|\d+-\d+|[\d,. ]*)\s*\s*(?:|[\W\s]*|\D*)*)(?:\s\s|\Z|\n)",
+        temp_name = re.findall(r"((?:\s*[\W\s]*)(?:|кр[ .]\s*|\d+\s+-\d+\s+|[\d,. ]*)\s*\s*(?:|[\W\s]*|\D*)*)(?:\s\s|\Z|\n)",
                                temp_name, flags=re.A)
         if isinstance(temp_name, list):
             for item in temp_name:
@@ -425,22 +463,22 @@ class Reader:
                     item = re.sub(r"\(", "", item, flags=re.A)
                     item = re.sub(r"\)", "", item, flags=re.A)
                     if if_except:
-                        if re.search(r"\d+-\d+", item, flags=re.A):
+                        if re.search(r"\d+\s+-\d+\s+", item, flags=re.A):
                             _except = if_diapason_week(item)
-                            item = re.sub(r"\d+-\d+", "", item, flags=re.A)
+                            item = re.sub(r"\d+\s+-\d+\s+", "", item, flags=re.A)
                         else:
                             _except = re.findall(r"(\d+)", item, flags=re.A)
                         item = re.sub(r"(кр[. \w])", "", item, flags=re.A)
                         item = re.sub(r"(\d+[,. н]+)", "", item, flags=re.A)
                         name = re.sub(r"( н[. ])", "", item, flags=re.A)
                     elif if_include:
-                        if re.search(r"\d+-\d+", item):
+                        if re.search(r"\d+\s+-\d+\s+", item):
                             _include = if_diapason_week(item)
-                            item = re.sub(r"\d+-\d+", "", item, flags=re.A)
+                            item = re.sub(r"\d+\s+-\d+\s+", "", item, flags=re.A)
                         else:
                             _include = re.findall(r"(\d+)", item, flags=re.A)
-                        item = re.sub(r"(\d+[,. н]+)", "", item, flags=re.A)
-                        name = re.sub(r"(н[. ])", "", item, flags=re.A)
+                        item = re.sub(r"(\d+[;,. (?:н|нед)]+)", "", item, flags=re.A)
+                        name = re.sub(r"((?:н|нед)[. ])", "", item, flags=re.A)
                     else:
                         name = item
                     # name = re.sub(r"  ", " ", name)
@@ -450,24 +488,13 @@ class Reader:
                     result.append(one_str)
         return result
 
-    @staticmethod
-    def get_lesson_num_from_time(time_str):
-        time_dict = {
-            "9:00": 1,
-            "10:40": 2,
-            "13:10": 3,
-            "14:50": 4,
-            "16:30": 5,
-            "18:10": 6,
-            "19:50": 7,
-            "20:10": 8
-        }
-        if time_str in time_dict:
-            return time_dict[time_str]
+    def get_lesson_num_from_time(self, time_str):
+        if time_str in self.time_dict:
+            return self.time_dict[time_str]
         else:
             return 0
 
-    def write(self, doc_type, timetable, write_to_csv=False, write_to_db=False):
+    def write_to_csv_and_old_db(self, doc_type, timetable, write_to_csv=False, write_to_db=False):
         """Запись словаря 'timetable' в CSV файл или в базу данных
             - путь к файлу базы данных
         """
@@ -492,7 +519,7 @@ class Reader:
                               (doc_type, date, day_num, lesson_num, lesson_time, parity, discipline,
                                lesson_type, room, teacher, include_week, exception_week))
 
-        db_cursor = self.connect_to_db.cursor()
+        db_cursor = self.connect_to_old_db.cursor()
 
         with open(self.csv_file, "a", encoding="utf-8", newline="") as fh:
             if write_to_csv is not False:
@@ -539,8 +566,231 @@ class Reader:
                                                     dist["name"], dist["type"],
                                                     dist["room"], dist["teacher"],
                                                     include, exception)
-            self.connect_to_db.commit()
+            self.connect_to_old_db.commit()
             db_cursor.close()
+
+    def write_to_db(self, doc_type, timetable, write_to_db=False):
+        """
+        Запись словаря 'timetable' в базу данных по новой схеме
+        :param doc_type:
+        :param timetable:
+        :param write_to_db:
+        """
+
+        def create_tables():
+            """Если Таблица не создана, создать таблицу
+                table_name - Название таблицы
+            """
+            schema = {
+                "groups": """CREATE TABLE groups
+                            (
+                                group_id   INTEGER primary key autoincrement,
+                                group_name TEXT
+                            );""",
+                "teachers": """CREATE TABLE teachers
+                            (
+                                teacher_id      INTEGER primary key autoincrement,
+                                teacher_name    TEXT
+                            );""",
+                "rooms": """CREATE TABLE rooms
+                        (
+                            room_id  INTEGER primary key autoincrement,
+                            room_num TEXT
+                        );""",
+                "lesson_types": """CREATE TABLE lesson_types
+                                (
+                                    lesson_type_id   INTEGER primary key autoincrement,
+                                    lesson_type_name TEXT
+                                );""",
+                "occupations": """CREATE TABLE occupations
+                                    (
+                                        occupation_id INTEGER primary key,
+                                        occupation    TEXT
+                                    );""",
+                "disciplines": """CREATE TABLE disciplines
+                                    (
+                                        discipline_id   INTEGER primary key autoincrement,
+                                        discipline_name TEXT
+                                    );""",
+                "schedule_calls": """CREATE TABLE schedule_calls
+                                    (
+                                        call_id     INTEGER primary key,
+                                        call_time   TIME
+                                    );""",
+                "lessons": """CREATE TABLE lessons
+                                (
+                                    lesson_id   INTEGER primary key autoincrement,
+                                    group_num   INTEGER,
+                                    occupation  INTEGER,
+                                    discipline  INTEGER,
+                                    teacher     INTEGER,
+                                    date        TEXT,
+                                    day         INTEGER,
+                                    call_time   TIME,
+                                    call_num    INTEGER,
+                                    week        INTEGER,
+                                    lesson_type INTEGER,
+                                    room        INTEGER,
+                                    include     TEXT,
+                                    exception   TEXT,
+                                    FOREIGN KEY (group_num) REFERENCES groups(group_id),
+                                    FOREIGN KEY (occupation) REFERENCES occupations (occupation_id),
+                                    FOREIGN KEY (discipline) REFERENCES disciplines (discipline_id),
+                                    FOREIGN KEY (teacher) REFERENCES teachers (teacher_id),
+                                    FOREIGN KEY (lesson_type) REFERENCES lesson_types (lesson_type_id),
+                                    FOREIGN KEY (room) REFERENCES rooms(room_id),
+                                    FOREIGN KEY (call_num) REFERENCES schedule_calls(call_id)
+                                );"""
+            }
+            indexes = {
+                "groups": """CREATE INDEX groups_group_id_index ON groups (group_id);""",
+                "teachers": """CREATE INDEX teachers_teacher_id_index ON teachers (teacher_id);""",
+                "rooms": """CREATE INDEX rooms_room_id_index ON rooms (room_id);""",
+                "lesson_types": """CREATE INDEX lesson_types_lesson_type_id_index ON lesson_types (lesson_type_id);""",
+                "occupations": """CREATE INDEX occupations_occupation_id_index ON occupations (occupation_id);""",
+                "disciplines": """CREATE INDEX disciplines_discipline_id_index ON disciplines (discipline_id)""",
+                "schedule_calls": """CREATE INDEX schedule_calls_call_id_index ON schedule_calls (call_id);""",
+                "lessons": """CREATE INDEX lessons_lesson_id_index ON lessons (lesson_id);"""
+            }
+
+            db_cursor.execute("""SELECT tbl_name FROM sqlite_master WHERE type='table'""")
+
+            table_list = db_cursor.fetchall()
+            tables = []
+            for tab_name in table_list:
+                tables.append(tab_name[0])
+
+            for tab_name in schema:
+                if tab_name not in tables:
+                    db_cursor.execute(schema[tab_name])
+                    db_cursor.execute(indexes[tab_name])
+
+        def data_append_to_groups(group_name):
+            db_cursor.execute("""INSERT INTO groups(group_name) SELECT '{}' 
+                                    WHERE NOT EXISTS(SELECT group_id FROM groups WHERE group_name = '{}')""".format(
+                group_name, group_name))
+
+        def data_append_to_occupation(occupation_id):
+            occupation = list(self.doc_type_list.keys())[list(self.doc_type_list.values()).index(occupation_id)]
+
+            db_cursor.execute(
+                """INSERT INTO occupations(occupation_id, occupation) SELECT '{}', '{}'
+                        WHERE NOT EXISTS(SELECT occupation_id FROM occupations WHERE occupation = '{}');""".format(
+                    occupation_id, occupation, occupation))
+
+        def data_append_to_disciplines(discipline_name):
+            db_cursor.execute(
+                """INSERT INTO disciplines(discipline_name) SELECT '{}'
+                        WHERE NOT EXISTS(SELECT discipline_id FROM disciplines WHERE discipline_name = '{}');""".format(
+                    discipline_name, discipline_name))
+
+        def data_append_to_lesson_types(lesson_type):
+            db_cursor.execute(
+                """INSERT INTO lesson_types(lesson_type_name) SELECT '{}'
+                        WHERE NOT EXISTS(SELECT lesson_type_id FROM lesson_types WHERE lesson_type_name = '{}');""".format(
+                    lesson_type, lesson_type))
+
+        def data_append_to_rooms(room_num):
+            db_cursor.execute(
+                """INSERT INTO rooms(room_num) SELECT '{}'
+                        WHERE NOT EXISTS(SELECT room_id FROM rooms WHERE room_num = '{}');""".format(
+                    room_num, room_num))
+
+        def data_append_to_teachers(teacher_name):
+            db_cursor.execute(
+                """INSERT INTO teachers(teacher_name) SELECT '{}'
+                        WHERE NOT EXISTS(SELECT teacher_id FROM teachers WHERE teacher_name = '{}');""".format(
+                    teacher_name, teacher_name))
+
+        def data_append_to_schedule_calls(call_dict):
+            for call_time in call_dict:
+                call_id = list(call_dict.values())[list(call_dict.keys()).index(call_time)]
+
+                db_cursor.execute(
+                    """INSERT INTO schedule_calls(call_id, call_time) SELECT '{}', '{}'
+                            WHERE NOT EXISTS(SELECT call_id FROM schedule_calls WHERE call_time = '{}');""".format(
+                        call_id, call_time, call_time))
+
+        def data_append_to_lesson(group_name, occupation, discipline_name, teacher_name, date, day_num, call_time,
+                                  call_num,
+                                  week, lesson_type, room_num, include, exception):
+
+            db_cursor.execute("""SELECT group_id FROM groups WHERE group_name = '{}'""".format(group_name))
+            group_id = db_cursor.fetchall()[0][0]
+            db_cursor.execute("""SELECT occupation_id FROM occupations WHERE occupation = '{}'""".format(occupation))
+            occupation_id = db_cursor.fetchall()[0][0]
+            db_cursor.execute(
+                """SELECT discipline_id FROM disciplines WHERE discipline_name = '{}'""".format(discipline_name))
+            discipline_id = db_cursor.fetchall()[0][0]
+            db_cursor.execute("""SELECT teacher_id FROM teachers WHERE teacher_name = '{}'""".format(teacher_name))
+            teacher_id = db_cursor.fetchall()[0][0]
+            db_cursor.execute(
+                """SELECT lesson_type_id FROM lesson_types WHERE lesson_type_name = '{}'""".format(lesson_type))
+            lesson_type_id = db_cursor.fetchall()[0][0]
+            db_cursor.execute("""SELECT room_id FROM rooms WHERE room_num = '{}'""".format(room_num))
+            room_id = db_cursor.fetchall()[0][0]
+
+            db_cursor.execute("""INSERT INTO lessons(group_num, occupation, discipline, teacher, lesson_type, room,
+                                                     date, day, call_time, call_num, week, include, exception) 
+                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                              """, (group_id, occupation_id, discipline_id, teacher_id, lesson_type_id, room_id,
+                                    date, day_num, call_time, call_num, week, include, exception))
+
+        def remove_old_schedule_from_lessons(group_name):
+            db_cursor.execute("""SELECT group_id FROM groups WHERE group_name = '{}'""".format(group_name))
+            group_id = db_cursor.fetchall()[0][0]
+            if group_id is not None:
+                db_cursor.execute("""DELETE FROM lessons WHERE group_num = '{}'""".format(group_id))
+
+        db_cursor = self.connect_to_db.cursor()
+
+        create_tables()
+        data_append_to_schedule_calls(self.time_dict)
+        data_append_to_occupation(doc_type)
+        for group_name, value in sorted(timetable.items()):
+
+            if write_to_db is not False:
+
+                group_name = re.findall(r"([А-Я]+-\w+-\w+)", group_name, re.I)
+                if len(group_name) > 0:
+                    group_name = group_name[0]
+                    data_append_to_groups(group_name)
+                    remove_old_schedule_from_lessons(group_name)
+
+                for n_day, day_item in sorted(value.items()):
+                    for n_lesson, lesson_item in sorted(day_item.items()):
+                        for n_week, item in sorted(lesson_item.items()):
+                            day_num = n_day.split("_")[1]
+                            call_num = n_lesson.split("_")[1]
+                            week = n_week.split("_")[1]
+                            for dist in item:
+                                date = dist['date']
+                                call_time = dist['time']
+                                if "include" in dist:
+                                    include = str(dist["include"])[1:-1]
+                                else:
+                                    include = ""
+                                if "exception" in dist:
+                                    exception = str(dist["exception"])[1:-1]
+                                else:
+                                    exception = ""
+
+                                if write_to_db is not False:
+                                    data_append_to_teachers(dist['teacher'])
+                                    data_append_to_disciplines(dist['name'])
+                                    data_append_to_lesson_types(dist['type'])
+                                    data_append_to_rooms(dist['room'])
+
+                                    occupation = list(self.doc_type_list.keys())[
+                                        list(self.doc_type_list.values()).index(doc_type)]
+
+                                    data_append_to_lesson(group_name, occupation, dist['name'], dist['teacher'], date,
+                                                          day_num,
+                                                          call_time, call_num,
+                                                          week, dist['type'], dist['room'], include, exception)
+
+        self.connect_to_db.commit()
+        db_cursor.close()
 
     def write_to_json(self, timetable, doc_type):
         """Запись словаря 'timetable' в JSON файл
@@ -650,7 +900,7 @@ class Reader:
             if isinstance(time, float):
                 time = xlrd.xldate.xldate_as_datetime(time, 0).strftime("%H:%M")
 
-            lesson_num = Reader.get_lesson_num_from_time(time)
+            lesson_num = self.get_lesson_num_from_time(time)
 
             room = self.format_room_name(sheet.cell(string_index, discipline_col_num + 2).value)
             if isinstance(room, float):
@@ -680,4 +930,4 @@ if __name__ == "__main__":
     Downloader.download()
 
     reader = Reader(path_to_db="table.db")
-    reader.run('xls', write_to_db=True, write_to_json_file=True, write_to_csv_file=True)
+    reader.run('xls', write_to_db=True, write_to_new_db=True, write_to_json_file=False, write_to_csv_file=False)

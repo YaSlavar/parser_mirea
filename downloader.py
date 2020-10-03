@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 class Downloader:
     def __init__(self, path_to_error_log='errors/downloadErrorLog.csv', base_file_dir='xls/', except_types=[]):
         """
-
+        Клаас загрузки расписания с сайта MIREA
         :type file_type: list
         """
 
@@ -65,15 +65,8 @@ class Downloader:
                     os.remove(download_path)
                 with open(download_path, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=8192):
-                        if chunk:  # filter out keep-alive new chunks
+                        if chunk:
                             f.write(chunk)
-
-            # bin_file = request.urlopen(download_url)
-            # print(bin_file)
-            # bin_file = requests.get(download_url)
-            # print(bin_file)
-            # with open(download_path, 'wb') as file:
-            #     file.write(bin_file.raw)
 
         if os.path.isfile(path):
             old_file_size = os.path.getsize(path)
@@ -96,7 +89,6 @@ class Downloader:
     def download(self):
 
         response = request.urlopen(self.url)  # Запрос страницы
-        # print(response)
         site = str(response.read().decode())  # Чтение страницы в переменную
         response.close()
 
@@ -112,7 +104,8 @@ class Downloader:
         # Сохранение файлов
         for url_file in url_files:  # цикл по списку
             divided_path = os.path.split(url_file)
-            subdir = os.path.split(divided_path[0])[1]
+            # subdir = os.path.split(divided_path[0])[1]
+            subdir = ''
             file_name = subdir + divided_path[1]
             try:
                 if os.path.splitext(file_name)[1].replace('.', '') in self.file_type:
@@ -127,8 +120,6 @@ class Downloader:
                         print('{} : {} -- {}'.format(result, path_to_file, count_file / progress_all * 100))
                     else:
                         continue
-
-
                 else:
                     count_file += 1  # Счетчик для отображения скаченных файлов в %
 
