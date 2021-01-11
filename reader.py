@@ -127,7 +127,8 @@ class Reader:
 
         return result
 
-    def run(self, xlsx_dir, write_to_json_file=False, write_to_csv_file=False, write_to_db=False, write_to_new_db=False):
+    def run(self, xlsx_dir, write_to_json_file=False, write_to_csv_file=False, write_to_db=False,
+            write_to_new_db=False):
         """
         Выполнение парсинга данных
         :param write_to_db:
@@ -407,7 +408,7 @@ class Reader:
         cell = str(cell)
         return re.split(r' {2,}|\n', cell)
 
-    def format_room_name(self, cell):
+    def format_room_name(self, cell) -> list:
         if isinstance(cell, float):
             cell = int(cell)
         string = str(cell)
@@ -417,7 +418,9 @@ class Reader:
                 string = string.replace('  ', '').replace('*', '').replace('\n', '')
                 string = re.sub(regex_result[0], self.notes_dict[regex_result[0]] + " ", string, flags=re.A)
 
-        return re.split(r' {2,}|\n', string)
+        # string = re.split(r' {2,}|\n', string)
+        room_list = [string]
+        return room_list
 
     @staticmethod
     def format_name(temp_name):
@@ -450,8 +453,9 @@ class Reader:
         temp_name = re.sub(r"((, *|)кроме {1,})", " кр.", temp_name, flags=re.A)
         temp_name = re.sub(r"(н[\d,. ]*[+;])", "", temp_name, flags=re.A)
 
-        temp_name = re.findall(r"((?:\s*[\W\s]*)(?:|кр[ .]\s*|\d+\s+-\d+\s+|[\d,. ]*)\s*\s*(?:|[\W\s]*|\D*)*)(?:\s\s|\Z|\n)",
-                               temp_name, flags=re.A)
+        temp_name = re.findall(
+            r"((?:\s*[\W\s]*)(?:|кр[ .]\s*|\d+\s+-\d+\s+|[\d,. ]*)\s*\s*(?:|[\W\s]*|\D*)*)(?:\s\s|\Z|\n)",
+            temp_name, flags=re.A)
         if isinstance(temp_name, list):
             for item in temp_name:
                 if len(item) > 0:
@@ -465,19 +469,38 @@ class Reader:
                         if re.search(r"\d+\s+-\d+\s+", item, flags=re.A):
                             _except = if_diapason_week(item)
                             item = re.sub(r"\d+\s+-\d+\s+", "", item, flags=re.A)
+
                         else:
                             _except = re.findall(r"(\d+)", item, flags=re.A)
                         item = re.sub(r"(кр[. \w])", "", item, flags=re.A)
                         item = re.sub(r"(\d+[,. н]+)", "", item, flags=re.A)
                         name = re.sub(r"( н[. ])", "", item, flags=re.A)
+
                     elif if_include:
+                        # Если найдена вложенность
+                        subname = re.findall(r"[\d,. ]*н[\.]\s+-\s+(?:лк|пр)", item)
                         if re.search(r"\d+\s+-\d+\s+", item):
                             _include = if_diapason_week(item)
                             item = re.sub(r"\d+\s+-\d+\s+", "", item, flags=re.A)
+
+                        # elif isinstance(subname, list):
+                        #     # Цикл по вложенности
+                        #     for i_sub in subname:
+                        #         _include = re.findall(r"(\d+)", i_sub, flags=re.A)
+                        #         item = re.sub(r"(\d+[;,. (?:н|нед)]+)", "", item, flags=re.A)
+                        #         name = re.sub(r"((?:н|нед)[. ])", "", item, flags=re.A)
+                        #         name = name.replace("  ", " ")
+                        #         name = name.strip()
+                        #         one_str = [name, _include, _except]
+                        #         result.append(one_str)
+                        #     return result
+
                         else:
                             _include = re.findall(r"(\d+)", item, flags=re.A)
+
                         item = re.sub(r"(\d+[;,. (?:н|нед)]+)", "", item, flags=re.A)
                         name = re.sub(r"((?:н|нед)[. ])", "", item, flags=re.A)
+
                     else:
                         name = item
                     # name = re.sub(r"  ", " ", name)
@@ -511,9 +534,14 @@ class Reader:
                           week NUMERIC, name TEXT, type TEXT, room TEXT, teacher TEXT, include TEXT, exception TEXT)""".format(
                     group))
 
-        def data_append(group, doc_type, date, day_num, lesson_num, lesson_time, parity, discipline, lesson_type,
-                        room, teacher, include_week, exception_week):
+        def data_append(group='', doc_type='', date='', day_num='', lesson_num='', lesson_time='', parity='',
+                        discipline='', lesson_type='',
+                        room='', teacher='', include_week='', exception_week=''):
             """Добавление данных в базу данных"""
+            if isinstance(room, list):
+                room = room[0]
+            if isinstance(teacher, list):
+                teacher = teacher[0]
             db_cursor.execute("""INSERT INTO {} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""".format(group),
                               (doc_type, date, day_num, lesson_num, lesson_time, parity, discipline,
                                lesson_type, room, teacher, include_week, exception_week))
@@ -925,6 +953,5 @@ class Reader:
 
 
 if __name__ == "__main__":
-
     reader = Reader(path_to_db="table.db")
-    reader.run('xls', write_to_db=True, write_to_new_db=True, write_to_json_file=False, write_to_csv_file=False)
+    reader.run('xls', write_to_db=True, write_to_new_db=False, write_to_json_file=False, write_to_csv_file=False)

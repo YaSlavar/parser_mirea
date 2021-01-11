@@ -32,8 +32,8 @@ class Downloader:
         self.file_type = ['xls', 'xlsx']
         self.except_types = except_types
         self.download_dir = {
-            "zach": [r'zach', r'zachety'],
-            "exam": [r'zima', r'ekz', r'ekzam', r'ekzameny', r'sessiya'],
+            "zach": [r'zach', r'zachety', r'зач', r'зачеты', r'зачёты'],
+            "exam": [r'zima', r'ekz', r'ekzam', r'ekzameny', r'sessiya', r'зима', r'экз', r'экзамены', r'сессия'],
             "semester": [r'']
         }
 
