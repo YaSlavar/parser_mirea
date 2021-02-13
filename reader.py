@@ -930,6 +930,12 @@ class Reader:
             lesson_num = self.get_lesson_num_from_time(time)
 
             room = self.format_room_name(sheet.cell(string_index, discipline_col_num + 2).value)
+            if isinstance(room, list):
+                room = room[0]
+
+            if isinstance(teacher, list):
+                teacher = teacher[0]
+
             if isinstance(room, float):
                 room = int(room)
 

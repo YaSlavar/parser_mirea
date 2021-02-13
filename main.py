@@ -15,8 +15,8 @@ def run(start_semester=None, input_file=None, output_file=None, groups=None):
         out_file = input("Введите имя создаваемого файла таблицы по граппам(без расширения)...  ")
         out_file = os.path.join(os.path.dirname(sys.argv[0]), out_file + ".xlsx")
         print(out_file)
-        reader = Reader(source_file, base_name)
-        group_name_list = reader.read(write_to_json_file=True, write_to_csv_file=True, write_to_db=True, write_to_new_db=True)
+        __reader = Reader(source_file, base_name)
+        group_name_list = __reader.read(write_to_json_file=True, write_to_csv_file=True, write_to_db=True, write_to_new_db=True)
         start_date = input("Введите дату начала семестра. Например: 09.02.2018 ...  ")
         print("В текущем файле имеюися следующие группы:")
         for name in group_name_list:
@@ -32,8 +32,9 @@ def run(start_semester=None, input_file=None, output_file=None, groups=None):
         source_file = os.path.join(os.path.dirname(sys.argv[0]), input_file)
         out_file = os.path.join(os.path.dirname(sys.argv[0]), output_file)
 
-        reader = Reader(source_file, base_name)
-        group_name_list = reader.read(write_to_json_file=True, write_to_csv_file=True, write_to_db=True, write_to_new_db=True)
+        __reader = Reader(source_file, base_name)
+        group_name_list = __reader.read(write_to_json_file=True, write_to_csv_file=True, write_to_db=True,
+                                        write_to_new_db=True)
         for name in group_name_list:
             print(name)
         writer = New_to_old_table(template, base_name, out_file, start_semester, groups)
@@ -45,7 +46,8 @@ if __name__ == "__main__":
     while True:
         mode = int(input("Выберите режим работы: \n"
                          "1) Конвертация на основе настроек файла config.json\n"
-                         "2) Конвертация на основе пользовательского ввода (ручной ввод данных о конвертируемых файлах и т.д.)\n"
+                         "2) Конвертация на основе пользовательского ввода (ручной ввод данных о конвертируемых "
+                         "файлах и т.д.)\n"
                          "3) Загрузить расписание с сайта МИРЭА и сформировать файл БД SQLite3\n"
                          "0) Завершить выполнение скрипта!\n"))
 
@@ -56,10 +58,10 @@ if __name__ == "__main__":
                     conf = json.loads(fh.read())
                     start_semester = conf["start_semester"]
                     del conf['start_semester']
-                    for kurs in conf:
-                        input_file = conf[kurs]["input_files"]
-                        output_file = conf[kurs]["output_files"]
-                        groups = conf[kurs]["groups"]
+                    for course in conf:
+                        input_file = conf[course]["input_files"]
+                        output_file = conf[course]["output_files"]
+                        groups = conf[course]["groups"]
                         run(start_semester, input_file, output_file, groups)
 
                 print("Конвертация успешно выполнена!\n")
