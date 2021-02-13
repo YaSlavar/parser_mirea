@@ -641,7 +641,7 @@ class Reader:
                                     );""",
                 "schedule_calls": """CREATE TABLE schedule_calls
                                     (
-                                        call_id     INTEGER primary key,
+                                        call_id     INTEGER primary key autoincrement,
                                         call_time   TIME
                                     );""",
                 "lessons": """CREATE TABLE lessons
@@ -653,7 +653,6 @@ class Reader:
                                     teacher     INTEGER,
                                     date        TEXT,
                                     day         INTEGER,
-                                    call_time   TIME,
                                     call_num    INTEGER,
                                     week        INTEGER,
                                     lesson_type INTEGER,
@@ -729,7 +728,7 @@ class Reader:
                         WHERE NOT EXISTS(SELECT teacher_id FROM teachers WHERE teacher_name = '{}');""".format(
                     teacher_name, teacher_name))
 
-        def data_append_to_schedule_calls(call_dict):
+        def dict_data_append_to_schedule_calls(call_dict):
             for call_time in call_dict:
                 call_id = list(call_dict.values())[list(call_dict.keys()).index(call_time)]
 
@@ -738,30 +737,46 @@ class Reader:
                             WHERE NOT EXISTS(SELECT call_id FROM schedule_calls WHERE call_time = '{}');""".format(
                         call_id, call_time, call_time))
 
+        def data_append_to_schedule_calls(call_time):
+            db_cursor.execute(
+                """INSERT INTO schedule_calls(call_time) SELECT '{}'
+                        WHERE NOT EXISTS(SELECT call_id FROM schedule_calls WHERE call_time = '{}');""".format(
+                    call_time, call_time))
+
         def data_append_to_lesson(group_name, occupation, discipline_name, teacher_name, date, day_num, call_time,
                                   call_num,
                                   week, lesson_type, room_num, include, exception):
 
             db_cursor.execute("""SELECT group_id FROM groups WHERE group_name = '{}'""".format(group_name))
             group_id = db_cursor.fetchall()[0][0]
+
             db_cursor.execute("""SELECT occupation_id FROM occupations WHERE occupation = '{}'""".format(occupation))
             occupation_id = db_cursor.fetchall()[0][0]
+
             db_cursor.execute(
                 """SELECT discipline_id FROM disciplines WHERE discipline_name = '{}'""".format(discipline_name))
             discipline_id = db_cursor.fetchall()[0][0]
+
             db_cursor.execute("""SELECT teacher_id FROM teachers WHERE teacher_name = '{}'""".format(teacher_name))
             teacher_id = db_cursor.fetchall()[0][0]
+
             db_cursor.execute(
                 """SELECT lesson_type_id FROM lesson_types WHERE lesson_type_name = '{}'""".format(lesson_type))
             lesson_type_id = db_cursor.fetchall()[0][0]
+
             db_cursor.execute("""SELECT room_id FROM rooms WHERE room_num = '{}'""".format(room_num))
             room_id = db_cursor.fetchall()[0][0]
 
+            db_cursor.execute("""SELECT call_id FROM schedule_calls WHERE call_time = '{}'""".format(call_time))
+            call_id = db_cursor.fetchall()[0][0]
+            if call_id != call_num:  # Если звонки не совпадают, то считаем, что нестандартное время, переприсваиваем
+                call_num = call_id
+
             db_cursor.execute("""INSERT INTO lessons(group_num, occupation, discipline, teacher, lesson_type, room,
-                                                     date, day, call_time, call_num, week, include, exception) 
-                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                                     date, day, call_num, week, include, exception) 
+                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                               """, (group_id, occupation_id, discipline_id, teacher_id, lesson_type_id, room_id,
-                                    date, day_num, call_time, call_num, week, include, exception))
+                                    date, day_num, call_num, week, include, exception))
 
         def remove_old_schedule_from_lessons(group_name):
             db_cursor.execute("""SELECT group_id FROM groups WHERE group_name = '{}'""".format(group_name))
@@ -772,7 +787,7 @@ class Reader:
         db_cursor = self.connect_to_db.cursor()
 
         create_tables()
-        data_append_to_schedule_calls(self.time_dict)
+        dict_data_append_to_schedule_calls(self.time_dict)
         data_append_to_occupation(doc_type)
         for group_name, value in sorted(timetable.items()):
 
@@ -807,6 +822,7 @@ class Reader:
                                     data_append_to_disciplines(dist['name'])
                                     data_append_to_lesson_types(dist['type'])
                                     data_append_to_rooms(dist['room'])
+                                    data_append_to_schedule_calls(call_time)
 
                                     occupation = list(self.doc_type_list.keys())[
                                         list(self.doc_type_list.values()).index(doc_type)]
@@ -960,4 +976,4 @@ class Reader:
 
 if __name__ == "__main__":
     reader = Reader(path_to_db="table.db")
-    reader.run('xls', write_to_db=True, write_to_new_db=False, write_to_json_file=False, write_to_csv_file=False)
+    reader.run('xls', write_to_db=True, write_to_new_db=True, write_to_json_file=False, write_to_csv_file=False)
