@@ -202,7 +202,11 @@ class Reader:
             :param month_name: Названеи месяца в верхнем регистре
             :return:
             """
-            return self.months_dict[month_name.upper().replace(' ', '')]
+            try:
+                tmp_month_name = self.months_dict[month_name.upper().replace(' ', '')]
+            except KeyError:
+                tmp_month_name = self.months_dict[month_name.split()[0].upper().replace(' ', '')]
+            return tmp_month_name
 
         def get_column_range_for_type_eq_semester(xlsx_sheet, group_name_cell, group_name_row_index):
             """
@@ -309,6 +313,7 @@ class Reader:
                 month_num_col = xlsx_sheet.cell(day_num, group_name_row.index(group_name_cell) - 2)
                 if month_num_col.value != '':
                     month_num_val = get_month_num(month_num_col.value)
+                    print(month_num_val)
 
                 date_num_col = xlsx_sheet.cell(day_num, group_name_row.index(group_name_cell) - 1)
                 if date_num_col.value != '':
@@ -778,11 +783,12 @@ class Reader:
                               """, (group_id, occupation_id, discipline_id, teacher_id, lesson_type_id, room_id,
                                     date, day_num, call_num, week, include, exception))
 
-        def remove_old_schedule_from_lessons(group_name):
+        def remove_old_schedule_from_lessons(group_name, occupation_id):
             db_cursor.execute("""SELECT group_id FROM groups WHERE group_name = '{}'""".format(group_name))
             group_id = db_cursor.fetchall()[0][0]
             if group_id is not None:
-                db_cursor.execute("""DELETE FROM lessons WHERE group_num = '{}'""".format(group_id))
+                db_cursor.execute("""DELETE FROM lessons WHERE group_num = '{}' AND occupation = '{}'"""
+                                  .format(group_id, occupation_id))
 
         db_cursor = self.connect_to_db.cursor()
 
@@ -797,7 +803,7 @@ class Reader:
                 if len(group_name) > 0:
                     group_name = group_name[0]
                     data_append_to_groups(group_name)
-                    remove_old_schedule_from_lessons(group_name)
+                    remove_old_schedule_from_lessons(group_name, doc_type)
 
                 for n_day, day_item in sorted(value.items()):
                     for n_lesson, lesson_item in sorted(day_item.items()):
